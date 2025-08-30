@@ -178,9 +178,9 @@ class TransactionCreate(BaseModel):
 
 class PaymentOrder(BaseModel):
     amount: int = Field(..., gt=0, le=1000000000)  # Max 10 lakh rupees in paise
-    currency: str = Field("INR", regex=r'^[A-Z]{3}$')
+    currency: str = Field("INR", pattern=r'^[A-Z]{3}$')
     receipt: Optional[str] = Field(None, max_length=40)
-    plan_type: Optional[str] = Field("premium", regex=r'^(premium|basic)$')
+    plan_type: Optional[str] = Field("premium", pattern=r'^(premium|basic)$')
     
     @validator('amount')
     def validate_amount_paise(cls, v):
