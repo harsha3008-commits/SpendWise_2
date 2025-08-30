@@ -190,15 +190,19 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Profile</Text>
           
           <View style={styles.profileCard}>
-            <View style={styles.profileInfo}>
-              <View style={styles.avatarContainer}>
+            <TouchableOpacity style={styles.profileInfo} onPress={() => setShowProfileEdit(true)}>
+              <TouchableOpacity style={styles.avatarContainer} onPress={handleProfilePictureChange}>
                 <Ionicons name="person" size={32} color={theme.colors.primary} />
-              </View>
+                <View style={styles.avatarEditBadge}>
+                  <Ionicons name="camera" size={12} color="#FFFFFF" />
+                </View>
+              </TouchableOpacity>
               <View style={styles.profileDetails}>
-                <Text style={styles.profileName}>SpendWise User</Text>
-                <Text style={styles.profileEmail}>{user?.email}</Text>
+                <Text style={styles.profileName}>{profileData.name}</Text>
+                <Text style={styles.profileEmail}>{profileData.email}</Text>
               </View>
-            </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -232,17 +236,131 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          
+          <View style={styles.settingsCard}>
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="notifications" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Transaction Alerts</Text>
+                  <Text style={styles.settingSubtitle}>Get notified of new transactions</Text>
+                </View>
+              </View>
+              <Switch
+                value={notifications.transactionAlerts}
+                onValueChange={(value) => updateNotificationSetting('transactionAlerts', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={notifications.transactionAlerts ? '#FFFFFF' : '#F4F3F4'}
+              />
+            </View>
+
+            <View style={styles.settingDivider} />
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="wallet" size={20} color={theme.colors.warning} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Budget Alerts</Text>
+                  <Text style={styles.settingSubtitle}>Notify when approaching budget limits</Text>
+                </View>
+              </View>
+              <Switch
+                value={notifications.budgetAlerts}
+                onValueChange={(value) => updateNotificationSetting('budgetAlerts', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={notifications.budgetAlerts ? '#FFFFFF' : '#F4F3F4'}
+              />
+            </View>
+
+            <View style={styles.settingDivider} />
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="bar-chart" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Monthly Reports</Text>
+                  <Text style={styles.settingSubtitle}>Receive monthly spending summaries</Text>
+                </View>
+              </View>
+              <Switch
+                value={notifications.monthlyReports}
+                onValueChange={(value) => updateNotificationSetting('monthlyReports', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={notifications.monthlyReports ? '#FFFFFF' : '#F4F3F4'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Privacy & Permissions Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Privacy & Permissions</Text>
+          
+          <View style={styles.settingsCard}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleSMSPermission}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="mail" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>SMS Access</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {Platform.OS === 'android' 
+                      ? (permissions.smsAccess ? 'Enabled - Auto-detect transactions' : 'Allow SMS transaction detection')
+                      : 'Not available on iOS'
+                    }
+                  </Text>
+                </View>
+              </View>
+              {Platform.OS === 'android' && (
+                <Ionicons 
+                  name={permissions.smsAccess ? "checkmark-circle" : "chevron-forward"} 
+                  size={20} 
+                  color={permissions.smsAccess ? theme.colors.success : theme.colors.textSecondary} 
+                />
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem} onPress={handleDataExport}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="cloud-download" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Export Data</Text>
+                  <Text style={styles.settingSubtitle}>Download your financial data as CSV</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem} onPress={handleDataErase}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="trash" size={20} color={theme.colors.error} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Erase All Data</Text>
+                  <Text style={styles.settingSubtitle}>Permanently delete all your data</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Security Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
           
           <View style={styles.settingsCard}>
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={() => setShowChangePassword(true)}>
               <View style={styles.settingLeft}>
                 <Ionicons name="key" size={20} color={theme.colors.primary} style={styles.settingIcon} />
                 <View>
                   <Text style={styles.settingTitle}>Change Password</Text>
-                  <Text style={styles.settingSubtitle}>Update your password</Text>
+                  <Text style={styles.settingSubtitle}>Update your account password</Text>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
