@@ -258,8 +258,8 @@ class PaymentOrderCreate(BaseModel):
 
 class PaymentVerification(BaseModel):
     """Payment verification model"""
-    razorpay_order_id: str = Field(..., regex=r'^order_[A-Za-z0-9]+$', description="Razorpay order ID")
-    razorpay_payment_id: str = Field(..., regex=r'^pay_[A-Za-z0-9]+$', description="Razorpay payment ID")
+    razorpay_order_id: str = Field(..., pattern=r'^order_[A-Za-z0-9]+$', description="Razorpay order ID")
+    razorpay_payment_id: str = Field(..., pattern=r'^pay_[A-Za-z0-9]+$', description="Razorpay payment ID")
     razorpay_signature: str = Field(..., min_length=64, max_length=256, description="Payment signature")
 
 class PaymentOrder(BaseModel):
@@ -343,7 +343,7 @@ class TokenData(BaseModel):
 # Response Models
 class APIResponse(BaseModel):
     """Standard API response wrapper"""
-    status: str = Field(..., regex=r'^(success|error)$')
+    status: str = Field(..., pattern=r'^(success|error)$')
     message: str
     data: Optional[Dict[str, Any]] = None
     error_code: Optional[str] = None
@@ -378,8 +378,8 @@ class LedgerVerificationRequest(BaseModel):
 class BlockchainAnchorRequest(BaseModel):
     """Blockchain anchor request"""
     transaction_ids: List[str] = Field(..., min_items=1, max_items=100)
-    network: str = Field("polygon", regex=r'^(polygon|ethereum|arbitrum)$')
-    wallet_address: str = Field(..., regex=r'^0x[a-fA-F0-9]{40}$')
+    network: str = Field("polygon", pattern=r'^(polygon|ethereum|arbitrum)$')
+    wallet_address: str = Field(..., pattern=r'^0x[a-fA-F0-9]{40}$')
 
 # File Upload Models
 class FileUpload(BaseModel):
@@ -414,7 +414,7 @@ class FileUpload(BaseModel):
 # Export Models
 class ExportRequest(BaseModel):
     """Data export request"""
-    format: str = Field(..., regex=r'^(csv|xlsx|pdf|json)$')
+    format: str = Field(..., pattern=r'^(csv|xlsx|pdf|json)$')
     date_range: Optional[DateRange] = None
     include_attachments: bool = Field(False, description="Include file attachments")
     categories: Optional[List[str]] = Field(None, max_items=50)
@@ -422,7 +422,7 @@ class ExportRequest(BaseModel):
 class ExportStatus(BaseModel):
     """Export status response"""
     export_id: str
-    status: str = Field(..., regex=r'^(pending|processing|completed|failed)$')
+    status: str = Field(..., pattern=r'^(pending|processing|completed|failed)$')
     progress: int = Field(..., ge=0, le=100)
     download_url: Optional[str] = None
     expires_at: Optional[datetime] = None
