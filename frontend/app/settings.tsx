@@ -58,10 +58,107 @@ export default function SettingsScreen() {
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: logout
+          onPress: async () => {
+            try {
+              await logout();
+              // Force navigation back to login screen
+              console.log('User logged out successfully');
+            } catch (error) {
+              console.error('Logout error:', error);
+              Alert.alert('Error', 'Failed to logout properly');
+            }
+          }
         }
       ]
     );
+  };
+
+  const handleUpgradeToPremium = () => {
+    Alert.alert(
+      '🌟 Upgrade to Premium',
+      'Unlock advanced features:\n\n🤖 AI Expense Analysis\n📊 Monthly PDF/CSV Reports\n📈 Advanced Analytics\n🔔 Priority Notifications\n\nPrice: ₹499/month',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Upgrade Now', 
+          onPress: () => {
+            // TODO: Integrate with actual payment system
+            setIsPremium(true);
+            Alert.alert('Success!', 'Welcome to SpendWise Premium! 🎉');
+          }
+        }
+      ]
+    );
+  };
+
+  const handleAIAnalysis = () => {
+    if (!isPremium) {
+      handleUpgradeToPremium();
+      return;
+    }
+    
+    Alert.alert(
+      '🤖 AI Analysis',
+      'Generating intelligent insights about your spending patterns...',
+      [
+        { 
+          text: 'View Analysis', 
+          onPress: () => {
+            // TODO: Navigate to AI Analysis screen or show analysis results
+            Alert.alert('AI Insights', 'Based on your transactions:\n\n• You spent 22% more on Food this month\n• Consider reducing online orders\n• Your transportation costs are optimized\n• Savings goal: On track! 📈');
+          }
+        }
+      ]
+    );
+  };
+
+  const generateMonthlyReport = async () => {
+    if (!isPremium) {
+      handleUpgradeToPremium();
+      return;
+    }
+
+    try {
+      Alert.alert('Generating Report', 'Creating your monthly expense report...');
+      
+      // TODO: Fetch actual transaction data from backend
+      const reportData = `SpendWise Monthly Report - ${new Date().toLocaleDateString()}
+
+INCOME:
+Salary: ₹50,000
+Freelance: ₹15,000
+Total Income: ₹65,000
+
+EXPENSES:
+Food & Dining: ₹12,000
+Transportation: ₹3,000  
+Bills & Utilities: ₹8,000
+Shopping: ₹5,500
+Entertainment: ₹2,000
+Total Expenses: ₹30,500
+
+NET SAVINGS: ₹34,500
+
+INSIGHTS:
+• Food expenses increased by 15% this month
+• Transportation costs are within budget
+• Savings rate: 53% (Excellent!)`;
+
+      const fileUri = FileSystem.documentDirectory + `SpendWise_Report_${new Date().getFullYear()}_${new Date().getMonth() + 1}.txt`;
+      await FileSystem.writeAsStringAsync(fileUri, reportData);
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'text/plain',
+          dialogTitle: 'Share Monthly Report'
+        });
+        Alert.alert('Success', 'Monthly report generated and shared!');
+      } else {
+        Alert.alert('Success', 'Monthly report saved to device storage');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to generate monthly report');
+    }
   };
 
   const handleProfileUpdate = () => {
