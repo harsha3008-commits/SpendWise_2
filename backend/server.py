@@ -112,7 +112,7 @@ security = HTTPBearer()
 
 # Enhanced Pydantic Models with strict validation
 class UserCreate(BaseModel):
-    email: Optional[str] = Field(None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    email: Optional[str] = Field(None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
     password: str = Field(..., min_length=8)
     
     @validator('password')
