@@ -23,6 +23,9 @@ import asyncio
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
+# Import AI/LLM integration
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+
 # Import blockchain utilities
 from utils.blockchain_utils import (
     SpendWiseBlockchain,
