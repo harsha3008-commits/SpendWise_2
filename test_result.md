@@ -475,6 +475,42 @@ frontend:
           agent: "testing"
           comment: "NOT TESTED - Wallet integration not tested due to Web3 dependencies and blockchain connectivity requirements in test environment. Feature is implemented but requires external wallet providers (MetaMask, WalletConnect) which are not available in automated testing environment."
 
+  - task: "Frontend-Backend JWT Authentication Integration"
+    implemented: false
+    working: false
+    file: "/app/frontend/lib/api.ts"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL INTEGRATION GAP CONFIRMED: Frontend completely lacks JWT authentication integration with hardened backend. No user registration/login screens, no JWT token storage/management, API calls missing Authorization headers. Frontend uses local passphrase auth only, not connected to backend auth system. Backend auth endpoints exist (register/login) but frontend doesn't use them."
+
+  - task: "Dashboard API Integration"
+    implemented: true
+    working: false
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ DASHBOARD NOT INTEGRATED WITH BACKEND: Dashboard displays correctly with mobile-responsive design but shows only static placeholder data (all ₹0 values). No API calls detected to backend for real financial data. Dashboard needs connection to authenticated backend APIs for transactions, analytics, and user data."
+
+  - task: "Razorpay Payment Integration with Security"
+    implemented: true
+    working: false
+    file: "/app/frontend/app/settings.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ PAYMENT INTEGRATION INCOMPLETE: Premium subscription UI present in settings with upgrade flow accessible, but payment integration not connected to hardened backend. Missing JWT authentication for payment endpoints, no integration with backend Razorpay signature verification. Frontend payment flow needs connection to secured backend payment APIs."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
