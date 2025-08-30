@@ -477,15 +477,18 @@ frontend:
 
   - task: "Enhanced Settings Screen Implementation"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/app/settings.tsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "✅ SETTINGS ENHANCEMENT COMPLETED: Implemented fully functional settings screen with Profile Management (edit name/email, profile picture upload), Theme Selection (light/dark toggle with persistence), Notifications (transaction/budget/monthly alerts), Privacy & Permissions (SMS access, data export/erase), Security (password change, 2FA options). Added modal interfaces for profile editing and password changes. Enhanced with proper dark mode theming and mobile-responsive design. All features include proper state management and user feedback."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL BACKEND ENDPOINTS MISSING: Enhanced Settings screen cannot function properly due to missing backend user management endpoints. ✅ Authentication system working perfectly (100% success rate): JWT registration, login, token refresh, security validation all functional. ❌ MISSING CRITICAL ENDPOINTS: GET /api/users/{id} (get user profile), PUT /api/users/{id} (update profile name/email), PUT /api/users/{id}/password (change password). These endpoints are essential for Settings screen functionality including profile editing and password changes. Frontend settings screen is implemented but cannot connect to backend user management APIs."
 
   - task: "Dashboard API Integration"
     implemented: true
