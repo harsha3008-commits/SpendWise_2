@@ -611,6 +611,20 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    position: 'relative',
+  },
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.card,
   },
   profileDetails: {
     flex: 1,
@@ -637,6 +651,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    minHeight: 56,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -655,6 +670,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   settingSubtitle: {
     fontSize: 13,
     color: theme.colors.textSecondary,
+    lineHeight: 16,
   },
   settingDivider: {
     height: 1,
@@ -673,6 +689,67 @@ const createStyles = (theme: any) => StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: theme.colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalCancel: {
+    fontSize: 17,
+    fontWeight: '400',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalSave: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    marginTop: 20,
+  },
+  input: {
+    borderRadius: 10,
+    padding: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    minHeight: 50,
+  },
+  passwordRequirements: {
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F8F9FA',
+    borderRadius: 10,
+  },
+  requirementsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  requirementItem: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 4,
   },
 });
 
