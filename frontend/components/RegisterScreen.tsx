@@ -12,19 +12,23 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { register, validateEmail, validatePassword } from '../lib/auth';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface RegisterScreenProps {
-  onRegisterSuccess: () => void;
   onSwitchToLogin: () => void;
 }
 
-export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: RegisterScreenProps) {
+export default function RegisterScreen({ onSwitchToLogin }: RegisterScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { login: authLogin } = useAuth();
+  const { theme } = useTheme();
 
   const handleRegister = async () => {
     // Basic validation
@@ -63,10 +67,11 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
       });
 
       console.log('Registration successful:', user.email);
+      await authLogin(user);
       Alert.alert(
         'Account Created',
         'Your account has been created successfully!',
-        [{ text: 'Continue', onPress: onRegisterSuccess }]
+        [{ text: 'Continue', onPress: () => {} }]
       );
     } catch (error: any) {
       console.error('Registration failed:', error);
@@ -78,8 +83,8 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
 
   const getPasswordStrengthColor = () => {
     const validation = validatePassword(password);
-    if (password.length === 0) return '#374151';
-    return validation.isValid ? '#10B981' : '#F59E0B';
+    if (password.length === 0) return theme.colors.border;
+    return validation.isValid ? theme.colors.success : theme.colors.warning;
   };
 
   const getPasswordStrengthText = () => {
@@ -87,6 +92,8 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
     const validation = validatePassword(password);
     return validation.isValid ? 'Strong password' : 'Password requirements not met';
   };
+
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
@@ -97,7 +104,7 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.header}>
-            <Ionicons name="shield-checkmark" size={80} color="#10B981" />
+            <Ionicons name="shield-checkmark" size={80} color={theme.colors.primary} />
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.subtitle}>
               Join SpendWise for secure, private finance management
@@ -109,11 +116,11 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Email Address</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="mail" size={20} color="#64748B" style={styles.inputIcon} />
+                <Ionicons name="mail" size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your email"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -127,11 +134,11 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Password</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed" size={20} color="#64748B" style={styles.inputIcon} />
+                <Ionicons name="lock-closed" size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { paddingRight: 50 }]}
                   placeholder="Create a strong password"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -146,7 +153,7 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
                   <Ionicons
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#64748B"
+                    color={theme.colors.textSecondary}
                   />
                 </TouchableOpacity>
               </View>
@@ -168,11 +175,11 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Confirm Password</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed" size={20} color="#64748B" style={styles.inputIcon} />
+                <Ionicons name="lock-closed" size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { paddingRight: 50 }]}
                   placeholder="Confirm your password"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
@@ -187,7 +194,7 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
                   <Ionicons
                     name={showConfirmPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#64748B"
+                    color={theme.colors.textSecondary}
                   />
                 </TouchableOpacity>
               </View>
@@ -197,11 +204,31 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
             <View style={styles.passwordRequirements}>
               <Text style={styles.requirementsTitle}>Password Requirements:</Text>
               <View style={styles.requirementsList}>
-                <RequirementItem text="At least 8 characters" met={password.length >= 8} />
-                <RequirementItem text="One uppercase letter" met={/[A-Z]/.test(password)} />
-                <RequirementItem text="One lowercase letter" met={/[a-z]/.test(password)} />
-                <RequirementItem text="One number" met={/[0-9]/.test(password)} />
-                <RequirementItem text="One special character" met={/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)} />
+                <RequirementItem 
+                  text="At least 8 characters" 
+                  met={password.length >= 8}
+                  theme={theme}
+                />
+                <RequirementItem 
+                  text="One uppercase letter" 
+                  met={/[A-Z]/.test(password)}
+                  theme={theme}
+                />
+                <RequirementItem 
+                  text="One lowercase letter" 
+                  met={/[a-z]/.test(password)}
+                  theme={theme}
+                />
+                <RequirementItem 
+                  text="One number" 
+                  met={/[0-9]/.test(password)}
+                  theme={theme}
+                />
+                <RequirementItem 
+                  text="One special character" 
+                  met={/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)}
+                  theme={theme}
+                />
               </View>
             </View>
 
@@ -234,7 +261,7 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
             </TouchableOpacity>
 
             <View style={styles.securityNotice}>
-              <Ionicons name="shield-checkmark" size={16} color="#10B981" />
+              <Ionicons name="shield-checkmark" size={16} color={theme.colors.success} />
               <Text style={styles.securityText}>
                 Your data is encrypted end-to-end and stored securely
               </Text>
@@ -247,25 +274,25 @@ export default function RegisterScreen({ onRegisterSuccess, onSwitchToLogin }: R
 }
 
 // Helper component for password requirements
-function RequirementItem({ text, met }: { text: string; met: boolean }) {
+function RequirementItem({ text, met, theme }: { text: string; met: boolean; theme: any }) {
   return (
     <View style={styles.requirementItem}>
       <Ionicons
         name={met ? "checkmark-circle" : "ellipse-outline"}
         size={16}
-        color={met ? "#10B981" : "#64748B"}
+        color={met ? theme.colors.success : theme.colors.textSecondary}
       />
-      <Text style={[styles.requirementText, { color: met ? "#10B981" : "#64748B" }]}>
+      <Text style={[styles.requirementText, { color: met ? theme.colors.success : theme.colors.textSecondary }]}>
         {text}
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
@@ -283,13 +310,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#F1F5F9',
+    color: theme.colors.text,
     marginTop: 24,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -303,7 +330,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#F1F5F9',
+    color: theme.colors.text,
     marginBottom: 8,
   },
   inputWrapper: {
@@ -319,14 +346,14 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: theme.colors.border,
     borderRadius: 12,
     paddingVertical: 16,
     paddingLeft: 48,
     paddingRight: 16,
     fontSize: 16,
-    color: '#F1F5F9',
-    backgroundColor: '#1E293B',
+    color: theme.colors.text,
+    backgroundColor: theme.colors.surface,
   },
   passwordToggle: {
     position: 'absolute',
@@ -351,15 +378,15 @@ const styles = StyleSheet.create({
   passwordRequirements: {
     marginBottom: 24,
     padding: 16,
-    backgroundColor: '#1E293B',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: theme.colors.border,
   },
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#F1F5F9',
+    color: theme.colors.text,
     marginBottom: 12,
   },
   requirementsList: {
@@ -376,16 +403,16 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     paddingVertical: 16,
-    backgroundColor: '#10B981',
+    backgroundColor: theme.colors.primary,
     borderRadius: 12,
     alignItems: 'center',
   },
   registerButtonDisabled: {
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.textSecondary,
   },
   registerButtonText: {
     fontSize: 16,
-    color: '#F1F5F9',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   footer: {
@@ -399,25 +426,25 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.border,
   },
   dividerText: {
     fontSize: 14,
-    color: '#64748B',
+    color: theme.colors.textSecondary,
     paddingHorizontal: 16,
   },
   loginButton: {
     paddingVertical: 16,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#10B981',
+    borderColor: theme.colors.primary,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 24,
   },
   loginButtonText: {
     fontSize: 16,
-    color: '#10B981',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   securityNotice: {
@@ -428,7 +455,19 @@ const styles = StyleSheet.create({
   },
   securityText: {
     fontSize: 12,
-    color: '#64748B',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
+  },
+});
+
+const styles = StyleSheet.create({
+  requirementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  requirementText: {
+    fontSize: 12,
+    flex: 1,
   },
 });
