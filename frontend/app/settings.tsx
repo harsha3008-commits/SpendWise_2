@@ -1,313 +1,192 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-  Modal,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function SettingsScreen() {
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [syncEnabled, setSyncEnabled] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const { user, logout } = useAuth();
+  const { theme, isDark, toggleTheme } = useTheme();
 
-  const handleUpgrade = () => {
+  const handleLogout = async () => {
     Alert.alert(
-      'Upgrade to Premium',
-      'Premium features include:\n\n• Advanced Analytics\n• Recurring Transaction Detection\n• Export Data\n• Encrypted Sync\n• Priority Support\n\nPrice: ₹199/month',
+      'Logout',
+      'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => setShowPremiumModal(true) }
+        { 
+          text: 'Logout', 
+          style: 'destructive',
+          onPress: logout
+        }
       ]
     );
   };
 
-  const handleLedgerVerification = () => {
-    Alert.alert(
-      'Ledger Verification',
-      'Your transaction ledger is verified and secure. All transactions are properly hash-chained for maximum security.',
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handleExportData = () => {
-    Alert.alert(
-      'Export Data',
-      'Export your financial data in encrypted format. This feature is available for Premium users.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Learn More', onPress: handleUpgrade }
-      ]
-    );
-  };
-
-  const renderSettingItem = (
-    icon: string,
-    title: string,
-    subtitle?: string,
-    onPress?: () => void,
-    rightElement?: React.ReactNode,
-    premium?: boolean
-  ) => (
-    <TouchableOpacity 
-      style={styles.settingItem} 
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View style={styles.settingLeft}>
-        <View style={[styles.settingIcon, { backgroundColor: premium ? '#FFF3CD' : '#E3F2FD' }]}>
-          <Ionicons 
-            name={icon as any} 
-            size={20} 
-            color={premium ? '#FF9500' : '#007AFF'} 
-          />
-        </View>
-        <View style={styles.settingTextContainer}>
-          <View style={styles.settingTitleRow}>
-            <Text style={styles.settingTitle}>{title}</Text>
-            {premium && (
-              <View style={styles.premiumBadge}>
-                <Ionicons name="diamond" size={12} color="#FF9500" />
-              </View>
-            )}
-          </View>
-          {subtitle && (
-            <Text style={styles.settingSubtitle}>{subtitle}</Text>
-          )}
-        </View>
-      </View>
-      <View style={styles.settingRight}>
-        {rightElement || (
-          onPress && <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderSection = (title: string, children: React.ReactNode) => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionContent}>
-        {children}
-      </View>
-    </View>
-  );
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
+        <Ionicons name="settings" size={24} color="#FFFFFF" />
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {/* Subscription */}
-        <View style={styles.subscriptionCard}>
-          <View style={styles.subscriptionHeader}>
-            <Ionicons name="diamond-outline" size={24} color="#666" />
-            <View style={styles.subscriptionInfo}>
-              <Text style={styles.subscriptionPlan}>Free Plan</Text>
-              <Text style={styles.subscriptionSubtitle}>Upgrade for advanced features</Text>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Profile Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Profile</Text>
+          
+          <View style={styles.profileCard}>
+            <View style={styles.profileInfo}>
+              <View style={styles.avatarContainer}>
+                <Ionicons name="person" size={32} color={theme.colors.primary} />
+              </View>
+              <View style={styles.profileDetails}>
+                <Text style={styles.profileName}>SpendWise User</Text>
+                <Text style={styles.profileEmail}>{user?.email}</Text>
+              </View>
             </View>
           </View>
-          <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
-            <Text style={styles.upgradeButtonText}>Upgrade to Premium</Text>
+        </View>
+
+        {/* Appearance Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Appearance</Text>
+          
+          <View style={styles.settingsCard}>
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons 
+                  name={isDark ? "moon" : "sunny"} 
+                  size={20} 
+                  color={theme.colors.primary} 
+                  style={styles.settingIcon}
+                />
+                <View>
+                  <Text style={styles.settingTitle}>Dark Mode</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={isDark ? '#FFFFFF' : '#F4F3F4'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Security Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Security</Text>
+          
+          <View style={styles.settingsCard}>
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="key" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Change Password</Text>
+                  <Text style={styles.settingSubtitle}>Update your password</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="shield-checkmark" size={20} color={theme.colors.success} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Two-Factor Authentication</Text>
+                  <Text style={styles.settingSubtitle}>Enhance your account security</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Premium Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Premium Features</Text>
+          
+          <View style={styles.settingsCard}>
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="star" size={20} color={theme.colors.warning} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Upgrade to Premium</Text>
+                  <Text style={styles.settingSubtitle}>Unlock advanced analytics & features</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="cloud-upload" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Data Export</Text>
+                  <Text style={styles.settingSubtitle}>Export your financial data</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Privacy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Privacy & Data</Text>
+          
+          <View style={styles.settingsCard}>
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="document-text" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Privacy Policy</Text>
+                  <Text style={styles.settingSubtitle}>How we protect your data</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="help-circle" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Help & Support</Text>
+                  <Text style={styles.settingSubtitle}>Get help and contact support</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Logout Section */}
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.logoutCard} onPress={handleLogout}>
+            <Ionicons name="log-out" size={20} color={theme.colors.error} style={styles.settingIcon} />
+            <Text style={[styles.logoutText, { color: theme.colors.error }]}>Logout</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Security & Privacy */}
-        {renderSection('SECURITY & PRIVACY', (
-          <>
-            {renderSettingItem(
-              'shield-checkmark',
-              'Ledger Verification',
-              'Tap to verify integrity',
-              handleLedgerVerification
-            )}
-            {renderSettingItem(
-              'finger-print',
-              'Biometric Lock',
-              'Use fingerprint or face recognition',
-              undefined,
-              <Switch
-                value={biometricEnabled}
-                onValueChange={setBiometricEnabled}
-              />
-            )}
-            {renderSettingItem(
-              'time',
-              'Auto-lock Timer',
-              '5 minutes',
-              () => Alert.alert('Auto-lock Timer', 'Configure auto-lock duration')
-            )}
-          </>
-        ))}
-
-        {/* Data & Sync */}
-        {renderSection('DATA & SYNC', (
-          <>
-            {renderSettingItem(
-              'cloud-upload',
-              'Encrypted Sync',
-              'Disabled',
-              undefined,
-              <Switch
-                value={syncEnabled}
-                onValueChange={setSyncEnabled}
-                disabled={!syncEnabled} // Disabled for free users
-              />,
-              true
-            )}
-            {renderSettingItem(
-              'download',
-              'Export Data',
-              'Export transactions and reports',
-              handleExportData,
-              undefined,
-              true
-            )}
-          </>
-        ))}
-
-        {/* General */}
-        {renderSection('GENERAL', (
-          <>
-            {renderSettingItem(
-              'notifications',
-              'Notifications',
-              'Bill reminders and alerts',
-              () => Alert.alert('Notifications', 'Configure notification settings')
-            )}
-            {renderSettingItem(
-              'card',
-              'Payment Methods',
-              'Manage payment options',
-              () => Alert.alert('Payment Methods', 'Add or remove payment methods')
-            )}
-            {renderSettingItem(
-              'globe',
-              'Currency',
-              'Indian Rupee (₹)',
-              () => Alert.alert('Currency', 'Change default currency')
-            )}
-          </>
-        ))}
-
-        {/* Support */}
-        {renderSection('SUPPORT', (
-          <>
-            {renderSettingItem(
-              'help-circle',
-              'Help & FAQ',
-              'Get support and answers',
-              () => Alert.alert('Help', 'Access help documentation')
-            )}
-            {renderSettingItem(
-              'document-text',
-              'Privacy Policy',
-              'How we handle your data',
-              () => Alert.alert('Privacy Policy', 'View privacy policy')
-            )}
-            {renderSettingItem(
-              'information-circle',
-              'About SpendWise',
-              'Version 1.0.0',
-              () => Alert.alert('About', 'SpendWise v1.0.0\nPrivacy-first finance management')
-            )}
-          </>
-        ))}
-
-        {/* Danger Zone */}
-        {renderSection('ACCOUNT', (
-          <>
-            {renderSettingItem(
-              'trash',
-              'Reset App',
-              'Clear all data permanently',
-              () => Alert.alert(
-                'Reset App',
-                'This will permanently delete all your data. This action cannot be undone.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Reset', style: 'destructive', onPress: () => {} }
-                ]
-              )
-            )}
-          </>
-        ))}
-
         <View style={{ height: 100 }} />
       </ScrollView>
-
-      {/* Premium Modal */}
-      <Modal
-        visible={showPremiumModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <View style={styles.premiumModal}>
-          <View style={styles.premiumHeader}>
-            <TouchableOpacity onPress={() => setShowPremiumModal(false)}>
-              <Text style={styles.premiumCancel}>Cancel</Text>
-            </TouchableOpacity>
-            <Text style={styles.premiumTitle}>SpendWise Premium</Text>
-            <View style={{ width: 60 }} />
-          </View>
-
-          <ScrollView style={styles.premiumContent}>
-            <View style={styles.premiumFeatures}>
-              <View style={styles.premiumFeatureItem}>
-                <Ionicons name="bar-chart" size={24} color="#007AFF" />
-                <View style={styles.premiumFeatureText}>
-                  <Text style={styles.premiumFeatureName}>Advanced Analytics</Text>
-                  <Text style={styles.premiumFeatureDesc}>AI-powered insights and forecasting</Text>
-                </View>
-              </View>
-
-              <View style={styles.premiumFeatureItem}>
-                <Ionicons name="repeat" size={24} color="#34C759" />
-                <View style={styles.premiumFeatureText}>
-                  <Text style={styles.premiumFeatureName}>Recurring Detection</Text>
-                  <Text style={styles.premiumFeatureDesc}>Automatically identify recurring transactions</Text>
-                </View>
-              </View>
-
-              <View style={styles.premiumFeatureItem}>
-                <Ionicons name="download" size={24} color="#FF9500" />
-                <View style={styles.premiumFeatureText}>
-                  <Text style={styles.premiumFeatureName}>Data Export</Text>
-                  <Text style={styles.premiumFeatureDesc}>Export detailed financial reports</Text>
-                </View>
-              </View>
-
-              <View style={styles.premiumFeatureItem}>
-                <Ionicons name="cloud-upload" size={24} color="#8B5CF6" />
-                <View style={styles.premiumFeatureText}>
-                  <Text style={styles.premiumFeatureName}>Encrypted Sync</Text>
-                  <Text style={styles.premiumFeatureDesc}>Secure multi-device synchronization</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.premiumPricing}>
-              <Text style={styles.premiumPrice}>₹199</Text>
-              <Text style={styles.premiumPeriod}>per month</Text>
-            </View>
-
-            <TouchableOpacity style={styles.premiumSubscribeButton}>
-              <Text style={styles.premiumSubscribeText}>Start Premium</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.premiumDisclaimer}>
-              Cancel anytime. Your privacy is always protected.
-            </Text>
-          </ScrollView>
-        </View>
-      </Modal>
     </View>
   );
 }
