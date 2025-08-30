@@ -453,6 +453,109 @@ export default function SettingsScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Profile Edit Modal */}
+      <Modal
+        visible={showProfileEdit}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+          
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowProfileEdit(false)}>
+              <Text style={[styles.modalCancel, { color: theme.colors.primary }]}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Edit Profile</Text>
+            <TouchableOpacity onPress={handleProfileUpdate}>
+              <Text style={[styles.modalSave, { color: theme.colors.primary }]}>Save</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Name</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
+              placeholder="Your name"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={profileData.name}
+              onChangeText={(text) => setProfileData({...profileData, name: text})}
+            />
+
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Email</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
+              placeholder="your.email@example.com"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={profileData.email}
+              onChangeText={(text) => setProfileData({...profileData, email: text})}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal
+        visible={showChangePassword}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+          
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowChangePassword(false)}>
+              <Text style={[styles.modalCancel, { color: theme.colors.primary }]}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Change Password</Text>
+            <TouchableOpacity onPress={handlePasswordChange}>
+              <Text style={[styles.modalSave, { color: theme.colors.primary }]}>Save</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Current Password</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
+              placeholder="Enter current password"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={passwordData.currentPassword}
+              onChangeText={(text) => setPasswordData({...passwordData, currentPassword: text})}
+              secureTextEntry
+            />
+
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>New Password</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
+              placeholder="Enter new password (min 8 characters)"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={passwordData.newPassword}
+              onChangeText={(text) => setPasswordData({...passwordData, newPassword: text})}
+              secureTextEntry
+            />
+
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Confirm New Password</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
+              placeholder="Confirm new password"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={passwordData.confirmPassword}
+              onChangeText={(text) => setPasswordData({...passwordData, confirmPassword: text})}
+              secureTextEntry
+            />
+
+            <View style={styles.passwordRequirements}>
+              <Text style={[styles.requirementsTitle, { color: theme.colors.textSecondary }]}>Password Requirements:</Text>
+              <Text style={[styles.requirementItem, { color: theme.colors.textSecondary }]}>• At least 8 characters long</Text>
+              <Text style={[styles.requirementItem, { color: theme.colors.textSecondary }]}>• Mix of letters and numbers recommended</Text>
+              <Text style={[styles.requirementItem, { color: theme.colors.textSecondary }]}>• Avoid common passwords</Text>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
