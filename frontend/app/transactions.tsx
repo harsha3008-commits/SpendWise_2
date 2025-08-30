@@ -10,8 +10,10 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Transaction {
   id: string;
@@ -34,6 +36,8 @@ export default function TransactionsScreen() {
     description: '',
     merchant: '',
   });
+
+  const { theme } = useTheme();
 
   const categories = [
     '🍽️ Food & Dining',
@@ -113,35 +117,39 @@ export default function TransactionsScreen() {
   };
 
   const renderTransaction = (transaction: Transaction) => (
-    <TouchableOpacity key={transaction.id} style={styles.transactionItem}>
-      <View style={styles.transactionIcon}>
+    <TouchableOpacity key={transaction.id} style={[styles.transactionItem, { backgroundColor: theme.colors.card }]}>
+      <View style={[styles.transactionIcon, { backgroundColor: theme.colors.background }]}>
         <Ionicons 
           name={transaction.type === 'income' ? 'arrow-up' : 'arrow-down'} 
           size={20} 
-          color={transaction.type === 'income' ? '#34C759' : '#FF3B30'} 
+          color={transaction.type === 'income' ? theme.colors.income : theme.colors.expense} 
         />
       </View>
       <View style={styles.transactionDetails}>
-        <Text style={styles.transactionCategory}>{transaction.category}</Text>
-        <Text style={styles.transactionDescription}>{transaction.description}</Text>
+        <Text style={[styles.transactionCategory, { color: theme.colors.text }]}>{transaction.category}</Text>
+        <Text style={[styles.transactionDescription, { color: theme.colors.textSecondary }]}>{transaction.description}</Text>
         {transaction.merchant && (
-          <Text style={styles.transactionMerchant}>{transaction.merchant}</Text>
+          <Text style={[styles.transactionMerchant, { color: theme.colors.textSecondary }]}>{transaction.merchant}</Text>
         )}
-        <Text style={styles.transactionDate}>
+        <Text style={[styles.transactionDate, { color: theme.colors.textSecondary }]}>
           {format(new Date(transaction.date), 'MMM dd, yyyy • hh:mm a')}
         </Text>
       </View>
       <Text style={[
         styles.transactionAmount,
-        { color: transaction.type === 'income' ? '#34C759' : '#FF3B30' }
+        { color: transaction.type === 'income' ? theme.colors.income : theme.colors.expense }
       ]}>
         {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toFixed(0)}
       </Text>
     </TouchableOpacity>
   );
 
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Transactions</Text>
         <TouchableOpacity
@@ -154,13 +162,20 @@ export default function TransactionsScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+          />
+        }
       >
         {transactions.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={60} color="#8E8E93" />
-            <Text style={styles.emptyStateTitle}>No transactions yet</Text>
-            <Text style={styles.emptyStateSubtitle}>
+            <Ionicons name="receipt-outline" size={60} color={theme.colors.textSecondary} />
+            <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No transactions yet</Text>
+            <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
               Add your first transaction to get started with tracking your finances
             </Text>
             <TouchableOpacity
@@ -184,11 +199,13 @@ export default function TransactionsScreen() {
         presentationStyle="pageSheet"
       >
         <View style={styles.modalContainer}>
+          <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+          
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowAddModal(false)}>
               <Text style={styles.modalCancel}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Add Transaction</Text>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Add Transaction</Text>
             <TouchableOpacity onPress={addTransaction}>
               <Text style={styles.modalSave}>Save</Text>
             </TouchableOpacity>
@@ -196,48 +213,53 @@ export default function TransactionsScreen() {
 
           <ScrollView style={styles.modalContent}>
             {/* Transaction Type */}
-            <Text style={styles.inputLabel}>Type</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Type</Text>
             <View style={styles.typeSelector}>
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  newTransaction.type === 'expense' && styles.typeButtonSelected
+                  { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                  newTransaction.type === 'expense' && { backgroundColor: theme.colors.expense, borderColor: theme.colors.expense }
                 ]}
                 onPress={() => setNewTransaction({...newTransaction, type: 'expense'})}
               >
-                <Ionicons name="remove" size={16} color={newTransaction.type === 'expense' ? 'white' : '#FF3B30'} />
+                <Ionicons name="remove" size={16} color={newTransaction.type === 'expense' ? 'white' : theme.colors.expense} />
                 <Text style={[
                   styles.typeButtonText,
-                  newTransaction.type === 'expense' && styles.typeButtonTextSelected
+                  { color: theme.colors.text },
+                  newTransaction.type === 'expense' && { color: 'white' }
                 ]}>Expense</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  newTransaction.type === 'income' && styles.typeButtonSelected
+                  { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                  newTransaction.type === 'income' && { backgroundColor: theme.colors.income, borderColor: theme.colors.income }
                 ]}
                 onPress={() => setNewTransaction({...newTransaction, type: 'income'})}
               >
-                <Ionicons name="add" size={16} color={newTransaction.type === 'income' ? 'white' : '#34C759'} />
+                <Ionicons name="add" size={16} color={newTransaction.type === 'income' ? 'white' : theme.colors.income} />
                 <Text style={[
                   styles.typeButtonText,
-                  newTransaction.type === 'income' && styles.typeButtonTextSelected
+                  { color: theme.colors.text },
+                  newTransaction.type === 'income' && { color: 'white' }
                 ]}>Income</Text>
               </TouchableOpacity>
             </View>
 
             {/* Amount */}
-            <Text style={styles.inputLabel}>Amount</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Amount</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="₹0"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newTransaction.amount}
               onChangeText={(text) => setNewTransaction({...newTransaction, amount: text})}
               keyboardType="numeric"
             />
 
             {/* Category */}
-            <Text style={styles.inputLabel}>Category</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.categorySelector}>
                 {categories.map((category) => (
@@ -245,13 +267,15 @@ export default function TransactionsScreen() {
                     key={category}
                     style={[
                       styles.categoryButton,
-                      newTransaction.category === category && styles.categoryButtonSelected
+                      { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                      newTransaction.category === category && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
                     ]}
                     onPress={() => setNewTransaction({...newTransaction, category})}
                   >
                     <Text style={[
                       styles.categoryButtonText,
-                      newTransaction.category === category && styles.categoryButtonTextSelected
+                      { color: theme.colors.text },
+                      newTransaction.category === category && { color: 'white' }
                     ]}>{category}</Text>
                   </TouchableOpacity>
                 ))}
@@ -259,19 +283,21 @@ export default function TransactionsScreen() {
             </ScrollView>
 
             {/* Description */}
-            <Text style={styles.inputLabel}>Description</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Description</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="What was this for?"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newTransaction.description}
               onChangeText={(text) => setNewTransaction({...newTransaction, description: text})}
             />
 
             {/* Merchant (Optional) */}
-            <Text style={styles.inputLabel}>Merchant (Optional)</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Merchant (Optional)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="Where did you spend?"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newTransaction.merchant}
               onChangeText={(text) => setNewTransaction({...newTransaction, merchant: text})}
             />
@@ -282,10 +308,10 @@ export default function TransactionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -294,15 +320,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.primary,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -322,19 +348,17 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#000',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtitle: {
     fontSize: 16,
-    color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
   },
   emptyStateButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
@@ -350,7 +374,6 @@ const styles = StyleSheet.create({
   transactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
@@ -359,7 +382,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F2F2F7',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -370,22 +392,18 @@ const styles = StyleSheet.create({
   transactionCategory: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 2,
   },
   transactionDescription: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 2,
   },
   transactionMerchant: {
     fontSize: 12,
-    color: '#8E8E93',
     marginBottom: 2,
   },
   transactionDate: {
     fontSize: 12,
-    color: '#8E8E93',
   },
   transactionAmount: {
     fontSize: 18,
@@ -393,7 +411,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -402,20 +420,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   modalCancel: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   modalSave: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   modalContent: {
@@ -425,17 +444,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 8,
     marginTop: 20,
   },
   input: {
-    backgroundColor: 'white',
     borderRadius: 10,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
   },
   typeSelector: {
     flexDirection: 'row',
@@ -448,23 +464,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
     gap: 8,
-  },
-  typeButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   typeButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-  },
-  typeButtonTextSelected: {
-    color: 'white',
   },
   categorySelector: {
     flexDirection: 'row',
@@ -473,20 +479,10 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-  },
-  categoryButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   categoryButtonText: {
     fontSize: 14,
-    color: '#000',
-  },
-  categoryButtonTextSelected: {
-    color: 'white',
   },
 });
