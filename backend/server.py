@@ -374,7 +374,14 @@ async def register(request: Request, user_data: UserCreate):
 async def login(request: Request, user_credentials: UserLogin):
     # Find user
     user = await db.users.find_one({"email": user_credentials.email})
-    if not user or not verify_password(user_credentials.password, user["password_hash"]):
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Check if password_hash exists (for backwards compatibility)
+    if "password_hash" not in user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(user_credentials.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Update last login
