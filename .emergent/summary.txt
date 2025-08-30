@@ -1,0 +1,135 @@
+<analysis>
+The AI engineer successfully bootstrapped and developed SpendWise, a privacy-first, blockchain-style finance app. The trajectory details the process from initial product requirements to a production-ready MVP. Key phases included clarifying the tech stack (Expo, FastAPI, MongoDB, Polygon), resolving numerous dependency issues on both frontend and backend, establishing core data models and crypto utilities, building essential UI screens (onboarding, dashboard, transactions, bills, budgets, settings, wallet), and implementing critical backend logic for a hash-chained ledger and Razorpay integration. Comprehensive testing was performed for backend APIs and blockchain features, followed by frontend UI verification. The work culminated in generating extensive project documentation (README, LICENSE, etc.). Currently, the AI engineer is actively working on security hardening, addressing critical recommendations for , crypto implementation, backend security, and payment verification.
+</analysis>
+
+<product_requirements>
+The user requested SpendWise, a local-first, privacy-first mobile finance app (Android/iOS via Capacitor) with a blockchain-style, tamper-resistant ledger. All financial data must remain on-device and be encrypted. Core features include expense/income tracking, budgets, bill reminders, and basic analytics. Monetization is via a premium subscription for advanced analytics, export, and optional encrypted multi-device sync (IPFS). The app must function offline. The tech stack includes TypeScript, React, Tailwind CSS, Capacitor, IndexedDB (Dexie + AES), , WebCrypto, Chart.js, Razorpay (Stripe fallback), , , , and Vite. Backend is FastAPI+MongoDB with Polygon blockchain integration for anchoring. Security is paramount, with all user data encrypted at rest via PBKDF2/Argon2-derived AES-GCM keys. Payments use Razorpay SDK with local-only subscription validation. The app should have screens for onboarding, dashboard, transactions, bills, budgets, analytics, subscriptions, and settings, following a specified file structure and key functions.
+</product_requirements>
+
+<key_technical_concepts>
+- **Local-first, Privacy-first:** Data encrypted and stored on-device.
+- **Blockchain-style Ledger:** Hash-chained transactions (), tamper detection.
+- **WebCrypto (AES-GCM, PBKDF2/Argon2):** For secure, authenticated encryption.
+- **Expo/React Native:** Cross-platform mobile UI development.
+- **FastAPI/MongoDB:** Backend for API, data storage, and ledger operations.
+- **Razorpay:** Payment gateway for subscriptions.
+- **Polygon (Web3):** Blockchain integration for data anchoring.
+- **Dexie/IndexedDB:** Local encrypted data storage.
+</key_technical_concepts>
+
+<code_architecture>
+The application follows a monorepo structure with  (Expo/React Native) and  (FastAPI).
+
+
+
+-   : Manages frontend dependencies, including , , 
+  Usage: expo [command] [options]
+
+  Options:
+  
+    -V, --version                     output the version number
+    --non-interactive                 Fail, if an interactive prompt would be required to continue.
+    -h, --help                        output usage information
+  
+  Commands:
+
+    init [name]                       Create a new Expo project
+    start [path]                      Start a local dev server for the app
+    start:web [path]                  Start a Webpack dev server for the web app
+    export [path]                     Export the static files of the app for hosting it on a web server
+    install [packages...]             Install a module or other package to a project
+    run:android [path]                Run the Android app binary locally
+    run:ios [path]                    Run the iOS app binary locally
+    send [path]                       Share the project's URL to an email address
+
+    login                             Login to an Expo account
+    logout                            Logout of an Expo account
+    register                          Sign up for a new Expo account
+    whoami                            Return the currently authenticated account
+
+    client:install:ios                Install Expo Go for iOS on the simulator
+    client:install:android            Install Expo Go for Android on a connected device or emulator
+
+    config [path]                     Show the project config
+    doctor [path]                     Diagnose issues with the project
+    upgrade [sdk-version]             Upgrade the project packages and config for the given SDK version
+
+    customize:web [path]              Eject the default web files for customization
+    prebuild [path]                   Create native iOS and Android project files before building natively.
+                                      Learn more: https://docs.expo.dev/workflow/customizing/
+
+    build:web [path]                  Build the web app for production
+
+    credentials:manager [path]        Superseded by eas credentials in eas-cli
+
+    url [path]                        Log a URL for opening the project in Expo Go
+    url:ipa [path]                    Log the download URL for the standalone iOS binary
+    url:apk [path]                    Log the download URL for the standalone Android binary
+
+    webhooks [path]                   List all webhooks for a project
+    webhooks:add [path]               Add a webhook to a project
+    webhooks:remove [path]            Delete a webhook
+    webhooks:update [path]            Update an existing webhook
+
+    build:ios [path]                  Superseded by eas build in eas-cli
+    build:android [path]              Superseded by eas build in eas-cli
+    build:status [path]               Superseded by eas build:list in eas-cli
+    eject [path]                      Superseded by expo prebuild
+    fetch:ios:certs [path]            Superseded by eas credentials in eas-cli
+    fetch:android:keystore [path]     Superseded by eas credentials in eas-cli
+    fetch:android:hashes [path]       Superseded by eas credentials in eas-cli
+    fetch:android:upload-cert [path]  Superseded by eas credentials in eas-cli
+    publish [path]                    Superseded by eas update in eas-cli
+    publish:set [path]                Superseded by eas update:republish in eas-cli
+    publish:rollback [path]           Superseded by eas update:republish in eas-cli
+    publish:history [path]            Superseded by eas update:list in eas-cli
+    publish:details [path]            Superseded by eas update:view in eas-cli
+    push:android:upload [path]        Superseded by eas credentials in eas-cli
+    push:android:show [path]          Superseded by eas credentials in eas-cli
+    push:android:clear [path]         Superseded by eas credentials in eas-cli
+    upload:android [path]             Superseded by eas submit in eas-cli
+    upload:ios [path]                 Superseded by eas submit in eas-cli
+    client:ios [path]                 Superseded by Expo Dev Clients
+
+[05:45:13]   Run a command with --help for more info 💡
+[05:45:13]     $ expo start --help
+[05:45:13] libraries, and UI frameworks. Modified extensively for dependency resolution.
+-   : The main entry point/onboarding screen. Was simplified and later enhanced to reflect the privacy-first onboarding UI.
+-   : Defines shared TypeScript types for the application's data model (Transaction, Category, etc.). Crucial for strong typing across the app.
+-   : Contains cryptographic utility functions like SHA-256 hashing, AES-GCM encryption/decryption, and key derivation using PBKDF2/Argon2. This file is central to the app's privacy and security. Recently updated for proper key derivation and AES-GCM enforcement.
+-   : Handles local data storage, likely using Dexie (IndexedDB) with encryption.
+-   : Implements the client-side logic for the hash-chained ledger, including hash computation and verification.
+-   : Contains logic for Web3 integration and wallet connection, specifically for Polygon.
+-   : Defines the main navigation structure using Expo Router, including tabs for Dashboard, Transactions, Bills, Budgets, Analytics, Settings, and Wallet.
+-   : These files represent the individual screens of the application (e.g., , , , , , , ).
+-   , : Reusable UI components.  was updated to include the ledger status badge and monthly stats.
+-   : Python dependencies for the FastAPI backend. Modified several times to fix missing dependencies.
+-   : The main FastAPI application. Handles API routes for CRUD operations, blockchain interactions, payment processing, and analytics. Recently updated to integrate blockchain utilities, enhance payment endpoints, and for backend hardening (CORS, JWT, rate limiting).
+-   : Contains server-side logic for computing and verifying ledger hashes, and potentially Merkle tree generation.
+-   : Defines Pydantic models for request/response validation and MongoDB schemas. Recently updated for input validation.
+-   , : Unit and integration tests for blockchain integrity, tamper detection, payment validation, and backend API functionality.
+-   : Specifies files and directories to ignore in version control. Recently updated to include .
+-   , , , : Project documentation and configuration templates.
+</code_architecture>
+
+<pending_tasks>
+-   Full biometric integration (beyond basic support).
+-   IPFS sync implementation for multi-device (premium feature).
+-   OCR Receipt Scan (client-side Tesseract.js).
+-   SMS Parsing (Android only).
+-   Further refining Razorpay integration for edge cases like idempotency.
+-   Advanced analytics dashboard (beyond basic calculations).
+</pending_tasks>
+
+<current_work>
+Immediately before this summary request, the AI engineer was engaged in implementing a series of critical security hardening measures based on user feedback. This includes:
+1.  **Updating **: To ensure that sensitive files like  containing API keys and secrets are never committed to version control.
+2.  **Enhancing **: To implement proper key derivation using PBKDF2/Argon2 with salt and iterations, and to enforce AES-GCM for all encryption operations, replacing any potential AES-CBC usage.
+3.  **Hardening **: By adding a CORS whitelist, implementing rate limiting (likely using ), integrating JWT with expiry and refresh token mechanisms, and enforcing server-side Razorpay signature verification.
+4.  **Validating inputs in **: By using Pydantic models for all API endpoints to ensure robust input validation.
+The AI engineer's last action was installing missing dependencies required for these security enhancements and preparing to create a security audit script.
+</current_work>
+
+<optional_next_step>
+Complete the installation of missing dependencies and finish implementing the remaining backend hardening and payment verification logic.
+</optional_next_step>

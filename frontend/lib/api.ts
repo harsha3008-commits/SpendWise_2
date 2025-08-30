@@ -4,7 +4,7 @@ import Constants from 'expo-constants';
 // Get backend URL from environment
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl || 
                    process.env.EXPO_PUBLIC_BACKEND_URL || 
-                   'https://local-finance-4.preview.emergentagent.com';
+                   'https://secure-wallet-3.preview.emergentagent.com';
 
 // Create axios instance with default config
 const api = axios.create({
