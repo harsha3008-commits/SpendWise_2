@@ -51,6 +51,11 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_DELTA = timedelta(hours=24)
 JWT_REFRESH_EXPIRATION_DELTA = timedelta(days=30)
 
+# AI Analysis Configuration
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+if not EMERGENT_LLM_KEY:
+    logging.warning("EMERGENT_LLM_KEY not found - AI analysis features will be disabled")
+
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 argon2_hasher = PasswordHasher()
