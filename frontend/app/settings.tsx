@@ -548,6 +548,122 @@ INSIGHTS:
           </View>
         </View>
 
+        {/* Premium Features Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🌟 Premium Features</Text>
+          
+          <View style={styles.settingsCard}>
+            {!isPremium ? (
+              <>
+                {/* Premium Status - Free User */}
+                <View style={[styles.settingItem, { backgroundColor: theme.mode === 'dark' ? 'rgba(255, 149, 0, 0.1)' : '#FFF8E1' }]}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="star-outline" size={20} color={theme.colors.warning} style={styles.settingIcon} />
+                    <View>
+                      <Text style={styles.settingTitle}>Free Plan</Text>
+                      <Text style={styles.settingSubtitle}>Upgrade to unlock advanced features</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity 
+                    style={[styles.upgradeButton, { backgroundColor: theme.colors.primary }]} 
+                    onPress={handleUpgradeToPremium}
+                  >
+                    <Text style={styles.upgradeButtonText}>Upgrade</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.settingDivider} />
+
+                {/* Premium Features Preview */}
+                <TouchableOpacity style={styles.settingItem} onPress={handleUpgradeToPremium}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="diamond-outline" size={20} color={theme.colors.textSecondary} style={styles.settingIcon} />
+                    <View>
+                      <Text style={[styles.settingTitle, { color: theme.colors.textSecondary }]}>🤖 AI Expense Analysis</Text>
+                      <Text style={styles.settingSubtitle}>Intelligent spending insights & suggestions</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="lock-closed" size={16} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+
+                <View style={styles.settingDivider} />
+
+                <TouchableOpacity style={styles.settingItem} onPress={handleUpgradeToPremium}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="document-text-outline" size={20} color={theme.colors.textSecondary} style={styles.settingIcon} />
+                    <View>
+                      <Text style={[styles.settingTitle, { color: theme.colors.textSecondary }]}>📊 Monthly Reports</Text>
+                      <Text style={styles.settingSubtitle}>PDF/CSV export & email sharing</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="lock-closed" size={16} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                {/* Premium Status - Premium User */}
+                <View style={[styles.settingItem, { backgroundColor: theme.mode === 'dark' ? 'rgba(76, 175, 80, 0.1)' : '#E8F5E8' }]}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="diamond" size={20} color={theme.colors.success} style={styles.settingIcon} />
+                    <View>
+                      <Text style={styles.settingTitle}>Premium Plan</Text>
+                      <Text style={styles.settingSubtitle}>All features unlocked • ₹499/month</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} />
+                </View>
+
+                <View style={styles.settingDivider} />
+
+                {/* AI Analysis */}
+                <TouchableOpacity style={styles.settingItem} onPress={handleAIAnalysis}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="sparkles" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                    <View>
+                      <Text style={styles.settingTitle}>🤖 AI Expense Analysis</Text>
+                      <Text style={styles.settingSubtitle}>Get intelligent insights about your spending</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+
+                <View style={styles.settingDivider} />
+
+                {/* Monthly Reports */}
+                <TouchableOpacity style={styles.settingItem} onPress={generateMonthlyReport}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="document-text" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                    <View>
+                      <Text style={styles.settingTitle}>📊 Generate Monthly Report</Text>
+                      <Text style={styles.settingSubtitle}>Download PDF/CSV with detailed analytics</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+
+                <View style={styles.settingDivider} />
+
+                {/* Premium Toggles */}
+                <View style={styles.settingItem}>
+                  <View style={styles.settingLeft}>
+                    <Ionicons name="flash" size={20} color={theme.colors.warning} style={styles.settingIcon} />
+                    <View>
+                      <Text style={styles.settingTitle}>Priority Notifications</Text>
+                      <Text style={styles.settingSubtitle}>Get instant alerts for important transactions</Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={premiumFeatures.prioritySupport}
+                    onValueChange={(value) => setPremiumFeatures({ ...premiumFeatures, prioritySupport: value })}
+                    trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                    thumbColor={premiumFeatures.prioritySupport ? '#FFFFFF' : '#F4F3F4'}
+                  />
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+
         {/* Logout Section */}
         <View style={styles.section}>
           <TouchableOpacity style={styles.logoutCard} onPress={handleLogout}>
