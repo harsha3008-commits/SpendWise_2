@@ -972,5 +972,16 @@ const createStyles = (theme: any) => StyleSheet.create({
     lineHeight: 18,
     marginBottom: 4,
   },
+  // Premium feature styles
+  upgradeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  upgradeButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
 
