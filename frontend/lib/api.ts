@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
+import { getValidAccessToken } from './auth';
 
 // Get backend URL from environment
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl || 
@@ -15,10 +16,24 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for logging
+// Request interceptor for authentication and logging
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    
+    // Add JWT token to requests (except auth endpoints)
+    const isAuthEndpoint = config.url?.includes('/auth/');
+    if (!isAuthEndpoint) {
+      try {
+        const token = await getValidAccessToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error getting access token:', error);
+      }
+    }
+    
     return config;
   },
   (error) => {
