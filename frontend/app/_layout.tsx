@@ -9,11 +9,16 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
-          backgroundColor: '#F2F2F7',
+          backgroundColor: 'white',
           borderTopColor: '#E5E5EA',
           height: 88,
           paddingBottom: 20,
           paddingTop: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 8,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -74,6 +79,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          href: null, // Hidden from tab bar, accessible via navigation
         }}
       />
     </Tabs>
