@@ -475,6 +475,18 @@ frontend:
           agent: "testing"
           comment: "NOT TESTED - Wallet integration not tested due to Web3 dependencies and blockchain connectivity requirements in test environment. Feature is implemented but requires external wallet providers (MetaMask, WalletConnect) which are not available in automated testing environment."
 
+  - task: "User Management Endpoints for Settings"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL MISSING ENDPOINTS: Backend lacks essential user management endpoints required for enhanced Settings screen functionality. MISSING: GET /api/users/{id} (retrieve user profile for settings display), PUT /api/users/{id} (update user name/email from settings), PUT /api/users/{id}/password (change password from settings). These endpoints are essential for the Settings screen to function properly. Authentication system is working perfectly, but user profile management is not implemented."
+
   - task: "Enhanced Settings Screen Implementation"
     implemented: true
     working: false
