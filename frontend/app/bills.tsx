@@ -10,8 +10,10 @@ import {
   Alert,
   Switch,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { format, addDays, addMonths } from 'date-fns';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Bill {
   id: string;
@@ -35,6 +37,8 @@ export default function BillsScreen() {
     isRecurring: false,
     reminderDays: [7, 1],
   });
+
+  const { theme } = useTheme();
 
   const categories = [
     '📋 Bills & Utilities',
@@ -94,11 +98,11 @@ export default function BillsScreen() {
   };
 
   const getBillStatusColor = (bill: Bill) => {
-    if (bill.isPaid) return '#34C759';
+    if (bill.isPaid) return theme.colors.success;
     const daysUntil = getDaysUntilDue(bill.dueDate);
-    if (daysUntil < 0) return '#FF3B30'; // Overdue
-    if (daysUntil <= 3) return '#FF9500'; // Due soon
-    return '#007AFF'; // Normal
+    if (daysUntil < 0) return theme.colors.error; // Overdue
+    if (daysUntil <= 3) return theme.colors.warning; // Due soon
+    return theme.colors.info; // Normal
   };
 
   const getBillStatusText = (bill: Bill) => {
@@ -117,17 +121,17 @@ export default function BillsScreen() {
     const statusText = getBillStatusText(bill);
 
     return (
-      <View key={bill.id} style={styles.billCard}>
+      <View key={bill.id} style={[styles.billCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.billHeader}>
           <View style={styles.billInfo}>
-            <Text style={styles.billName}>{bill.name}</Text>
-            <Text style={styles.billCategory}>{bill.category}</Text>
-            <Text style={styles.billDueDate}>
+            <Text style={[styles.billName, { color: theme.colors.text }]}>{bill.name}</Text>
+            <Text style={[styles.billCategory, { color: theme.colors.textSecondary }]}>{bill.category}</Text>
+            <Text style={[styles.billDueDate, { color: theme.colors.textSecondary }]}>
               Due {format(bill.dueDate, 'MMM dd, yyyy')}
             </Text>
           </View>
           <View style={styles.billAmountContainer}>
-            <Text style={styles.billAmount}>₹{bill.amount.toFixed(0)}</Text>
+            <Text style={[styles.billAmount, { color: theme.colors.text }]}>₹{bill.amount.toFixed(0)}</Text>
             <Text style={[styles.billStatus, { color: statusColor }]}>
               {statusText}
             </Text>
@@ -137,9 +141,9 @@ export default function BillsScreen() {
         <View style={styles.billFooter}>
           <View style={styles.billTags}>
             {bill.isRecurring && (
-              <View style={styles.recurringTag}>
-                <Ionicons name="repeat" size={12} color="#007AFF" />
-                <Text style={styles.recurringText}>Recurring</Text>
+              <View style={[styles.recurringTag, { backgroundColor: theme.mode === 'dark' ? 'rgba(100, 210, 255, 0.2)' : '#E3F2FD' }]}>
+                <Ionicons name="repeat" size={12} color={theme.colors.primary} />
+                <Text style={[styles.recurringText, { color: theme.colors.primary }]}>Recurring</Text>
               </View>
             )}
           </View>
@@ -157,31 +161,35 @@ export default function BillsScreen() {
     );
   };
 
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Bills & Reminders</Text>
       </View>
 
       <View style={styles.statsSection}>
-        <Text style={styles.statsTitle}>Upcoming Bills ({upcomingBills})</Text>
+        <Text style={[styles.statsTitle, { color: theme.colors.text }]}>Upcoming Bills ({upcomingBills})</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
         {bills.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyStateSection}>
-              <Ionicons name="receipt-outline" size={60} color="#C7C7CC" />
-              <Text style={styles.emptyStateTitle}>No upcoming bills</Text>
-              <Text style={styles.emptyStateSubtitle}>
+              <Ionicons name="receipt-outline" size={60} color={theme.colors.textSecondary} />
+              <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No upcoming bills</Text>
+              <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
                 All your bills are up to date!
               </Text>
             </View>
             
             <View style={styles.emptyStateSection}>
-              <Ionicons name="calendar-outline" size={60} color="#C7C7CC" />
-              <Text style={styles.emptyStateTitle}>No bills yet</Text>
-              <Text style={styles.emptyStateSubtitle}>
+              <Ionicons name="calendar-outline" size={60} color={theme.colors.textSecondary} />
+              <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No bills yet</Text>
+              <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
                 Add your first bill to get started with reminders
               </Text>
             </View>
@@ -197,7 +205,7 @@ export default function BillsScreen() {
 
       {/* Floating Action Button */}
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={() => setShowAddModal(true)}
       >
         <Ionicons name="add" size={24} color="white" />
@@ -210,11 +218,13 @@ export default function BillsScreen() {
         presentationStyle="pageSheet"
       >
         <View style={styles.modalContainer}>
+          <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+          
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowAddModal(false)}>
               <Text style={styles.modalCancel}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Add Bill</Text>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Add Bill</Text>
             <TouchableOpacity onPress={addBill}>
               <Text style={styles.modalSave}>Save</Text>
             </TouchableOpacity>
@@ -222,26 +232,28 @@ export default function BillsScreen() {
 
           <ScrollView style={styles.modalContent}>
             {/* Bill Name */}
-            <Text style={styles.inputLabel}>Bill Name</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Bill Name</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="e.g., Electricity Bill"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newBill.name}
               onChangeText={(text) => setNewBill({...newBill, name: text})}
             />
 
             {/* Amount */}
-            <Text style={styles.inputLabel}>Amount</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Amount</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="₹0"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newBill.amount}
               onChangeText={(text) => setNewBill({...newBill, amount: text})}
               keyboardType="numeric"
             />
 
             {/* Category */}
-            <Text style={styles.inputLabel}>Category</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.categorySelector}>
                 {categories.map((category) => (
@@ -249,13 +261,15 @@ export default function BillsScreen() {
                     key={category}
                     style={[
                       styles.categoryButton,
-                      newBill.category === category && styles.categoryButtonSelected
+                      { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                      newBill.category === category && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
                     ]}
                     onPress={() => setNewBill({...newBill, category})}
                   >
                     <Text style={[
                       styles.categoryButtonText,
-                      newBill.category === category && styles.categoryButtonTextSelected
+                      { color: theme.colors.text },
+                      newBill.category === category && { color: 'white' }
                     ]}>{category}</Text>
                   </TouchableOpacity>
                 ))}
@@ -263,31 +277,33 @@ export default function BillsScreen() {
             </ScrollView>
 
             {/* Due Date */}
-            <Text style={styles.inputLabel}>Due Date</Text>
-            <TouchableOpacity style={styles.dateButton}>
-              <Text style={styles.dateButtonText}>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Due Date</Text>
+            <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+              <Text style={[styles.dateButtonText, { color: theme.colors.text }]}>
                 {format(newBill.dueDate, 'MMM dd, yyyy')}
               </Text>
-              <Ionicons name="calendar-outline" size={20} color="#007AFF" />
+              <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
 
             {/* Recurring */}
             <View style={styles.switchRow}>
               <View>
-                <Text style={styles.inputLabel}>Recurring Bill</Text>
-                <Text style={styles.switchDescription}>
+                <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Recurring Bill</Text>
+                <Text style={[styles.switchDescription, { color: theme.colors.textSecondary }]}>
                   Automatically create next bill when marked as paid
                 </Text>
               </View>
               <Switch
                 value={newBill.isRecurring}
                 onValueChange={(value) => setNewBill({...newBill, isRecurring: value})}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={newBill.isRecurring ? '#FFFFFF' : '#F4F3F4'}
               />
             </View>
 
             {/* Reminder Settings */}
-            <Text style={styles.inputLabel}>Reminder Days</Text>
-            <Text style={styles.reminderDescription}>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Reminder Days</Text>
+            <Text style={[styles.reminderDescription, { color: theme.colors.textSecondary }]}>
               Get notified 7 days and 1 day before due date
             </Text>
           </ScrollView>
@@ -297,31 +313,32 @@ export default function BillsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
   },
   statsSection: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     paddingHorizontal: 20,
     paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   statsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   scrollView: {
     flex: 1,
@@ -338,23 +355,21 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtitle: {
     fontSize: 14,
-    color: '#8E8E93',
     textAlign: 'center',
   },
   billsList: {
     padding: 16,
   },
   billCard: {
-    backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
+    borderWidth: 1,
   },
   billHeader: {
     flexDirection: 'row',
@@ -367,17 +382,14 @@ const styles = StyleSheet.create({
   billName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 4,
   },
   billCategory: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 4,
   },
   billDueDate: {
     fontSize: 14,
-    color: '#8E8E93',
   },
   billAmountContainer: {
     alignItems: 'flex-end',
@@ -385,7 +397,6 @@ const styles = StyleSheet.create({
   billAmount: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
     marginBottom: 4,
   },
   billStatus: {
@@ -403,7 +414,6 @@ const styles = StyleSheet.create({
   recurringTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E3F2FD',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -411,7 +421,6 @@ const styles = StyleSheet.create({
   },
   recurringText: {
     fontSize: 12,
-    color: '#007AFF',
     fontWeight: '600',
   },
   payButton: {
@@ -431,7 +440,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#007AFF',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -442,7 +450,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -451,20 +459,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   modalCancel: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   modalSave: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   modalContent: {
@@ -474,17 +483,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 8,
     marginTop: 20,
   },
   input: {
-    backgroundColor: 'white',
     borderRadius: 10,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
   },
   categorySelector: {
     flexDirection: 'row',
@@ -493,35 +499,22 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-  },
-  categoryButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   categoryButtonText: {
     fontSize: 14,
-    color: '#000',
-  },
-  categoryButtonTextSelected: {
-    color: 'white',
   },
   dateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'white',
     borderRadius: 10,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
   },
   dateButtonText: {
     fontSize: 16,
-    color: '#000',
   },
   switchRow: {
     flexDirection: 'row',
@@ -531,12 +524,10 @@ const styles = StyleSheet.create({
   },
   switchDescription: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   reminderDescription: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
 });
