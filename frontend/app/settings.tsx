@@ -12,6 +12,34 @@ import { useTheme } from '../contexts/ThemeContext';
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
   const { theme, isDark, toggleTheme } = useTheme();
+  
+  // State for various modals and settings
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: 'SpendWise User',
+    email: user?.email || '',
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  
+  // Notification settings state
+  const [notifications, setNotifications] = useState({
+    transactionAlerts: true,
+    budgetAlerts: true,
+    monthlyReports: false,
+    securityAlerts: true,
+  });
+  
+  // Privacy settings state  
+  const [permissions, setPermissions] = useState({
+    smsAccess: false,
+    notifications: true,
+    locationAccess: false,
+  });
 
   const handleLogout = async () => {
     Alert.alert(
@@ -26,6 +54,122 @@ export default function SettingsScreen() {
         }
       ]
     );
+  };
+
+  const handleProfileUpdate = () => {
+    // TODO: Implement profile update API call
+    Alert.alert('Success', 'Profile updated successfully!');
+    setShowProfileEdit(false);
+  };
+
+  const handlePasswordChange = () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+    if (passwordData.newPassword.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters long');
+      return;
+    }
+    // TODO: Implement password change API call
+    Alert.alert('Success', 'Password changed successfully!');
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setShowChangePassword(false);
+  };
+
+  const handleProfilePictureChange = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (permissionResult.granted === false) {
+        Alert.alert('Permission required', 'Please allow access to your photo library');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        // TODO: Implement profile picture upload
+        Alert.alert('Success', 'Profile picture updated!');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile picture');
+    }
+  };
+
+  const handleDataExport = async () => {
+    try {
+      // Create sample CSV data - in real app, fetch from API
+      const csvData = `Date,Type,Amount,Category,Description
+2024-01-15,Expense,500,Food,Grocery shopping
+2024-01-14,Income,5000,Salary,Monthly salary
+2024-01-13,Expense,200,Transport,Uber ride`;
+
+      const fileUri = FileSystem.documentDirectory + 'spendwise_data_export.csv';
+      await FileSystem.writeAsStringAsync(fileUri, csvData);
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        Alert.alert('Success', 'Data exported to device storage');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export data');
+    }
+  };
+
+  const handleDataErase = () => {
+    Alert.alert(
+      'Erase All Data',
+      'This will permanently delete all your financial data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Erase All Data', 
+          style: 'destructive',
+          onPress: () => {
+            // TODO: Implement data erase API call
+            Alert.alert('Data Erased', 'All your data has been permanently deleted');
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSMSPermission = () => {
+    if (Platform.OS === 'android') {
+      Alert.alert(
+        'SMS Permission',
+        'Enable SMS access to automatically detect and categorize transactions from bank SMS messages.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Enable', 
+            onPress: () => {
+              // TODO: Request SMS permission and update state
+              setPermissions({ ...permissions, smsAccess: true });
+              Alert.alert('Permission Granted', 'SMS transaction detection is now enabled');
+            }
+          }
+        ]
+      );
+    } else {
+      Alert.alert(
+        'SMS Access',
+        'SMS transaction detection is not available on iOS. You can manually add transactions or use the share feature.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const updateNotificationSetting = (key: keyof typeof notifications, value: boolean) => {
+    setNotifications({ ...notifications, [key]: value });
+    // TODO: Save to AsyncStorage or API
   };
 
   const styles = createStyles(theme);
