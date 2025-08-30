@@ -1,16 +1,20 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 
-export default function TabLayout() {
+function TabLayout() {
+  const { theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopColor: '#E5E5EA',
+          backgroundColor: theme.colors.card,
+          borderTopColor: theme.colors.border,
           height: 88,
           paddingBottom: 20,
           paddingTop: 8,
@@ -88,5 +92,15 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <TabLayout />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
