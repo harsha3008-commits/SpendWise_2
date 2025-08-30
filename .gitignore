@@ -1,17 +1,38 @@
 # SpendWise - Git Ignore Configuration
 
 # ================================
-# Environment & Secrets
+# CRITICAL: Environment & Secrets
 # ================================
+# NEVER COMMIT THESE FILES
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 *.key
 *.pem
+*.p12
+*.keystore
 secrets/
 config/production.json
+config/staging.json
+
+# API Keys and Credentials (CRITICAL)
+**/razorpay_keys.json
+**/api_credentials.json
+**/private_keys/
+**/certificates/
+webhook_secrets.json
+jwt_secrets.json
+
+# Blockchain & Web3 Secrets
+.secret
+.mnemonic
+wallet/
+keystores/
+infura_keys.json
+
+# Database Credentials
+db_credentials.json
+mongodb_uri.txt
 
 # ================================
 # Dependencies & Packages
@@ -111,14 +132,6 @@ dumps/
 mongodb_data/
 
 # ================================
-# Blockchain & Web3
-# ================================
-.secret
-.mnemonic
-wallet/
-keystores/
-
-# ================================
 # Mobile Development
 # ================================
 # iOS
@@ -197,7 +210,7 @@ perf/
 benchmarks/
 
 # ================================
-# Security & Compliance
+# Security & Compliance (CRITICAL)
 # ================================
 # Never commit these!
 private.key
@@ -206,8 +219,15 @@ certificate.pem
 *.p12
 *.keystore
 
-# Razorpay webhook secrets
-webhook_secrets.json
+# Payment processor secrets
+razorpay_webhook_secrets.json
+stripe_keys.json
+payment_config.json
+
+# Authentication secrets
+jwt_private_key.pem
+jwt_public_key.pem
+session_secrets.json
 
 # User generated content
 user_uploads/
@@ -241,3 +261,16 @@ local_config/
 dev_notes.md
 TODO.md
 SCRATCH.md
+
+# ================================
+# SECURITY AUDIT EXCLUSIONS
+# ================================
+# Files that might contain secrets (BE EXTRA CAREFUL)
+**/config.json
+**/secrets.json
+**/*_secret*
+**/*_key*
+**/*_password*
+**/*_token*
+**/auth_*
+**/api_*
