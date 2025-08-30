@@ -133,9 +133,9 @@ class UserLogin(BaseModel):
 
 class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str = Field(..., regex=r'^(expense|income|transfer|bill)$')
+    type: str = Field(..., pattern=r'^(expense|income|transfer|bill)$')
     amount: float = Field(..., gt=0, le=10000000)  # Max 1 crore
-    currency: str = Field("INR", regex=r'^[A-Z]{3}$')
+    currency: str = Field("INR", pattern=r'^[A-Z]{3}$')
     categoryId: str = Field(..., min_length=1)
     accountId: Optional[str] = None
     note: Optional[str] = Field(None, max_length=500)
