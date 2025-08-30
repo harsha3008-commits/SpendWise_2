@@ -246,7 +246,7 @@ def verify_token(token: str, token_type: str = "access") -> TokenData:
         return TokenData(user_id=user_id, email=email)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.JWTError:
+    except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
