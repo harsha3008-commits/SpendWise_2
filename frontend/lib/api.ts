@@ -2,10 +2,12 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import { getValidAccessToken } from './auth';
 
-// Get backend URL from environment
-const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl || 
-                   process.env.EXPO_PUBLIC_BACKEND_URL || 
-                   'https://secure-wallet-3.preview.emergentagent.com';
+// Get backend URL from environment - use local for development
+const BACKEND_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8001'
+  : (Constants.expoConfig?.extra?.backendUrl || 
+     process.env.EXPO_PUBLIC_BACKEND_URL || 
+     'https://secure-wallet-3.preview.emergentagent.com');
 
 // Create axios instance with default config
 const api = axios.create({
