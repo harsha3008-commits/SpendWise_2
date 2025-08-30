@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Simple in-component state management for now
-export default function SpendWiseApp() {
-  const [appState, setAppState] = useState<'loading' | 'onboarding' | 'auth' | 'dashboard'>('loading');
-  const [passphrase, setPassphrase] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export default function DashboardScreen() {
+  const [appState, setAppState] = useState<'loading' | 'onboarding' | 'dashboard'>('loading');
+  const [stats, setStats] = useState({
+    income: 0,
+    expenses: 0,
+    netWorth: 0,
+    unpaidBills: 0
+  });
 
   useEffect(() => {
     checkAppState();
@@ -17,12 +20,8 @@ export default function SpendWiseApp() {
   const checkAppState = async () => {
     try {
       const initialized = await AsyncStorage.getItem('spendwise_initialized');
-      const encryptionKey = await AsyncStorage.getItem('spendwise_encryption_key');
-      
       if (!initialized) {
         setAppState('onboarding');
-      } else if (!encryptionKey) {
-        setAppState('auth');
       } else {
         setAppState('dashboard');
       }
@@ -33,61 +32,29 @@ export default function SpendWiseApp() {
   };
 
   const handleGetStarted = async () => {
-    setIsLoading(true);
     try {
-      // Simple setup - just mark as initialized and set a basic key
       await AsyncStorage.setItem('spendwise_initialized', 'true');
-      await AsyncStorage.setItem('spendwise_encryption_key', 'demo-key');
-      await AsyncStorage.setItem('spendwise_user_hash', 'demo-hash');
       setAppState('dashboard');
     } catch (error) {
-      Alert.alert('Error', 'Failed to initialize app');
-    } finally {
-      setIsLoading(false);
+      console.error('Error initializing app:', error);
     }
   };
 
-  const handleAuth = async () => {
-    if (!passphrase.trim()) {
-      Alert.alert('Error', 'Please enter a passphrase');
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      await AsyncStorage.setItem('spendwise_encryption_key', passphrase);
-      setAppState('dashboard');
-    } catch (error) {
-      Alert.alert('Error', 'Authentication failed');
-    } finally {
-      setIsLoading(false);
-    }
+  const formatCurrency = (amount: number) => {
+    return `₹${amount.toLocaleString('en-IN')}`;
   };
-
-  const handleReset = async () => {
-    await AsyncStorage.clear();
-    setAppState('onboarding');
-  };
-
-  if (appState === 'loading') {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
-    );
-  }
 
   if (appState === 'onboarding') {
     return (
-      <View style={styles.container}>
+      <View style={styles.onboardingContainer}>
         <StatusBar style="light" />
-        <View style={styles.content}>
-          <Ionicons name="shield-checkmark" size={80} color="#10B981" style={styles.icon} />
-          <Text style={styles.title}>SpendWise</Text>
-          <Text style={styles.subtitle}>
+        <View style={styles.onboardingContent}>
+          <Ionicons name="shield-checkmark" size={80} color="#10B981" style={styles.onboardingIcon} />
+          <Text style={styles.onboardingTitle}>SpendWise</Text>
+          <Text style={styles.onboardingSubtitle}>
             Privacy-First Finance Management
           </Text>
-          <Text style={styles.description}>
+          <Text style={styles.onboardingDescription}>
             • All data encrypted locally on your device{'\n'}
             • Blockchain-style transaction verification{'\n'}
             • No data sent to external servers{'\n'}
@@ -95,156 +62,120 @@ export default function SpendWiseApp() {
           </Text>
           
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            style={styles.getStartedButton}
             onPress={handleGetStarted}
-            disabled={isLoading}
           >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Setting up...' : 'Get Started'}
-            </Text>
+            <Text style={styles.getStartedButtonText}>Get Started</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  if (appState === 'auth') {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="light" />
-        <View style={styles.content}>
-          <Ionicons name="shield-checkmark" size={80} color="#10B981" style={styles.icon} />
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>
-            Enter your passphrase to access SpendWise
-          </Text>
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Enter passphrase"
-            placeholderTextColor="#64748B"
-            value={passphrase}
-            onChangeText={setPassphrase}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-          
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleAuth}
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Verifying...' : 'Unlock SpendWise'}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity onPress={handleReset}>
-            <Text style={styles.resetText}>Reset App</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  // Dashboard State
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Good Evening</Text>
-          <Text style={styles.headerTitle}>SpendWise</Text>
-        </View>
-        <View style={styles.headerActions}>
-          <View style={styles.ledgerStatus}>
-            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-            <Text style={styles.ledgerStatusText}>Verified</Text>
+        <Text style={styles.headerTitle}>SpendWise</Text>
+        <View style={styles.headerRight}>
+          <View style={styles.ledgerBadge}>
+            <Ionicons name="checkmark-circle" size={16} color="#34C759" />
+            <Text style={styles.ledgerText}>Verified</Text>
           </View>
-          <TouchableOpacity onPress={handleReset}>
-            <Ionicons name="settings-outline" size={24} color="#94A3B8" />
-          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Quick Stats */}
-      <View style={styles.statsContainer}>
-        <View style={[styles.statsCard, { borderLeftColor: '#10B981' }]}>
-          <View style={styles.statsHeader}>
-            <Ionicons name="trending-up" size={24} color="#10B981" />
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Stats Cards */}
+        <View style={styles.statsSection}>
+          <View style={styles.statsGrid}>
+            <View style={[styles.statsCard, styles.incomeCard]}>
+              <Text style={styles.statsLabel}>This Month's Income</Text>
+              <Text style={[styles.statsValue, { color: '#34C759' }]}>
+                {formatCurrency(stats.income)}
+              </Text>
+            </View>
+            
+            <View style={[styles.statsCard, styles.expenseCard]}>
+              <Text style={styles.statsLabel}>This Month's Expense</Text>
+              <Text style={[styles.statsValue, { color: '#FF3B30' }]}>
+                {formatCurrency(stats.expenses)}
+              </Text>
+            </View>
+            
+            <View style={[styles.statsCard, styles.netWorthCard]}>
+              <Text style={styles.statsLabel}>Net Worth</Text>
+              <Text style={[styles.statsValue, { color: '#34C759' }]}>
+                {formatCurrency(stats.netWorth)}
+              </Text>
+            </View>
           </View>
-          <Text style={styles.statsValue}>₹0</Text>
-          <Text style={styles.statsTitle}>Income This Month</Text>
         </View>
-        
-        <View style={[styles.statsCard, { borderLeftColor: '#EF4444' }]}>
-          <View style={styles.statsHeader}>
-            <Ionicons name="trending-down" size={24} color="#EF4444" />
-          </View>
-          <Text style={styles.statsValue}>₹0</Text>
-          <Text style={styles.statsTitle}>Expenses This Month</Text>
-        </View>
-        
-        <View style={[styles.statsCard, { borderLeftColor: '#10B981' }]}>
-          <View style={styles.statsHeader}>
-            <Ionicons name="wallet" size={24} color="#10B981" />
-          </View>
-          <Text style={styles.statsValue}>₹0</Text>
-          <Text style={styles.statsTitle}>Net Worth</Text>
-        </View>
-        
-        <View style={[styles.statsCard, { borderLeftColor: '#F59E0B' }]}>
-          <View style={styles.statsHeader}>
-            <Ionicons name="receipt" size={24} color="#F59E0B" />
-          </View>
-          <Text style={styles.statsValue}>0</Text>
-          <Text style={styles.statsTitle}>Unpaid Bills</Text>
-        </View>
-      </View>
 
-      {/* Quick Actions */}
-      <View style={styles.quickActions}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
-            <Ionicons name="remove-circle" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Add Expense</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}>
-            <Ionicons name="add-circle" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Add Income</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#8B5CF6' }]}>
-            <Ionicons name="calendar" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Add Bill</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#F59E0B' }]}>
-            <Ionicons name="bar-chart" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Analytics</Text>
-          </TouchableOpacity>
+        {/* Quick Actions */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsGrid}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#FF3B30' }]}>
+              <Ionicons name="remove-circle" size={32} color="white" />
+              <Text style={styles.actionCardText}>Add Expense</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#34C759' }]}>
+              <Ionicons name="add-circle" size={32} color="white" />
+              <Text style={styles.actionCardText}>Add Income</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#FF9500' }]}>
+              <Ionicons name="card" size={32} color="white" />
+              <Text style={styles.actionCardText}>Add Bill</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#007AFF' }]}>
+              <Ionicons name="bar-chart" size={32} color="white" />
+              <Text style={styles.actionCardText}>Analytics</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      {/* Welcome Message */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Welcome to SpendWise! 🎉</Text>
-        <View style={styles.welcomeCard}>
-          <Ionicons name="rocket" size={32} color="#10B981" />
-          <Text style={styles.welcomeText}>
-            Your privacy-first finance app is ready to use. Start by adding your first transaction!
-          </Text>
-          <Text style={styles.welcomeSubtext}>
-            • All data encrypted locally{'\n'}
-            • Blockchain-verified transactions{'\n'}
-            • Complete financial privacy
-          </Text>
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.sectionTitle}>Welcome to SpendWise! 🎉</Text>
+          <View style={styles.welcomeCard}>
+            <View style={styles.welcomeContent}>
+              <Ionicons name="rocket" size={48} color="#007AFF" style={styles.welcomeIcon} />
+              <Text style={styles.welcomeTitle}>Your privacy-first finance app is ready!</Text>
+              <Text style={styles.welcomeDescription}>
+                Start by adding your first transaction to begin tracking your finances securely.
+              </Text>
+              
+              <View style={styles.featuresList}>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34C759" />
+                  <Text style={styles.featureText}>All data encrypted locally</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34C759" />
+                  <Text style={styles.featureText}>Blockchain-verified transactions</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34C759" />
+                  <Text style={styles.featureText}>Complete financial privacy</Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity style={styles.getStartedSmallButton}>
+                <Text style={styles.getStartedSmallButtonText}>Add First Transaction</Text>
+                <Ionicons name="arrow-forward" size={16} color="#007AFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </View>
   );
 }
@@ -252,195 +183,203 @@ export default function SpendWiseApp() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F2F2F7',
   },
-  loadingContainer: {
+  onboardingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#1F2937',
   },
-  content: {
+  onboardingContent: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  icon: {
+  onboardingIcon: {
     marginBottom: 24,
   },
-  title: {
+  onboardingTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#10B981',
     textAlign: 'center',
     marginBottom: 8,
   },
-  subtitle: {
+  onboardingSubtitle: {
     fontSize: 18,
     color: '#F1F5F9',
     textAlign: 'center',
     marginBottom: 24,
   },
-  description: {
+  onboardingDescription: {
     fontSize: 16,
     color: '#94A3B8',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 40,
   },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#374151',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    fontSize: 16,
-    color: '#F1F5F9',
-    backgroundColor: '#1E293B',
-  },
-  button: {
+  getStartedButton: {
     width: '100%',
     paddingVertical: 16,
     backgroundColor: '#10B981',
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 16,
   },
-  buttonDisabled: {
-    backgroundColor: '#374151',
-  },
-  buttonText: {
+  getStartedButtonText: {
     fontSize: 16,
-    color: '#F1F5F9',
+    color: 'white',
     fontWeight: '600',
-  },
-  resetText: {
-    fontSize: 14,
-    color: '#F59E0B',
-    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 60,
-    paddingBottom: 24,
-  },
-  greeting: {
-    fontSize: 16,
-    color: '#94A3B8',
+    paddingBottom: 20,
+    backgroundColor: '#007AFF',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#F1F5F9',
+    color: 'white',
   },
-  headerActions: {
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  ledgerBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-  },
-  ledgerStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: 'rgba(52, 199, 89, 0.2)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#064E3B',
     gap: 4,
   },
-  ledgerStatusText: {
+  ledgerText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#10B981',
+    color: '#34C759',
   },
-  statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 24,
-    gap: 12,
+  scrollView: {
+    flex: 1,
+  },
+  statsSection: {
+    padding: 16,
+  },
+  statsGrid: {
+    gap: 16,
   },
   statsCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: '#1E293B',
+    backgroundColor: 'white',
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     borderLeftWidth: 4,
   },
-  statsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  incomeCard: {
+    borderLeftColor: '#34C759',
+  },
+  expenseCard: {
+    borderLeftColor: '#FF3B30',
+  },
+  netWorthCard: {
+    borderLeftColor: '#007AFF',
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: '#8E8E93',
     marginBottom: 8,
+    fontWeight: '500',
   },
   statsValue: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#F1F5F9',
-    marginBottom: 4,
   },
-  statsTitle: {
-    fontSize: 14,
-    color: '#94A3B8',
-  },
-  quickActions: {
-    paddingHorizontal: 24,
-    paddingVertical: 24,
+  quickActionsSection: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#F1F5F9',
+    color: '#000',
     marginBottom: 16,
   },
-  actionButtons: {
+  quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
   },
-  actionButton: {
+  actionCard: {
     flex: 1,
     minWidth: '45%',
-    flexDirection: 'row',
+    aspectRatio: 1.2,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 12,
     gap: 8,
   },
-  actionButtonText: {
+  actionCardText: {
+    color: 'white',
     fontSize: 14,
     fontWeight: '600',
-    color: 'white',
+    textAlign: 'center',
   },
-  section: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+  welcomeSection: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   welcomeCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: 'white',
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
+  },
+  welcomeContent: {
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#10B981',
   },
-  welcomeText: {
+  welcomeIcon: {
+    marginBottom: 16,
+  },
+  welcomeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  welcomeDescription: {
     fontSize: 16,
-    color: '#F1F5F9',
+    color: '#666',
     textAlign: 'center',
-    marginVertical: 12,
     lineHeight: 24,
+    marginBottom: 20,
   },
-  welcomeSubtext: {
+  featuresList: {
+    alignSelf: 'stretch',
+    marginBottom: 24,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  featureText: {
     fontSize: 14,
-    color: '#10B981',
-    textAlign: 'center',
-    lineHeight: 20,
+    color: '#666',
+  },
+  getStartedSmallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 20,
+    gap: 8,
+  },
+  getStartedSmallButtonText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
