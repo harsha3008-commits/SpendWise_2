@@ -693,6 +693,236 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# AI Analysis Models
+class AIAnalysisRequest(BaseModel):
+    user_id: str
+    analysis_type: str = Field(..., description="Type of analysis: 'spending_patterns', 'budget_suggestions', 'monthly_summary'")
+    time_period: Optional[str] = Field("current_month", description="Time period for analysis")
+
+class AIAnalysisResponse(BaseModel):
+    success: bool
+    analysis_type: str
+    insights: List[str]
+    recommendations: List[str]
+    summary: str
+    
+# AI Analysis Helper Functions
+async def get_user_transactions_for_analysis(user_id: str, time_period: str = "current_month"):
+    """Fetch user transactions for AI analysis"""
+    try:
+        # Define date range based on time_period
+        now = datetime.utcnow()
+        if time_period == "current_month":
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif time_period == "last_3_months":
+            start_date = (now - timedelta(days=90)).replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            start_date = (now - timedelta(days=30)).replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Fetch transactions from database
+        transactions_cursor = db.transactions.find({
+            "user_id": user_id,
+            "timestamp": {"$gte": start_date}
+        }).sort("timestamp", -1)
+        
+        transactions = []
+        async for transaction in transactions_cursor:
+            transactions.append({
+                "amount": transaction.get("amount", 0),
+                "type": transaction.get("type", "expense"),
+                "category": transaction.get("category", "other"),
+                "description": transaction.get("description", ""),
+                "timestamp": transaction.get("timestamp", now)
+            })
+        
+        return transactions
+    except Exception as e:
+        logger.error(f"Error fetching transactions for analysis: {e}")
+        return []
+
+async def generate_ai_insights(transactions: List[dict], analysis_type: str) -> dict:
+    """Generate AI insights using Emergent LLM"""
+    if not EMERGENT_LLM_KEY:
+        return {
+            "insights": ["AI analysis is currently unavailable"],
+            "recommendations": ["Please check your configuration"],
+            "summary": "AI analysis service is not configured"
+        }
+    
+    try:
+        # Prepare transaction data for analysis
+        total_expenses = sum(t["amount"] for t in transactions if t["type"] == "expense")
+        total_income = sum(t["amount"] for t in transactions if t["type"] == "income") 
+        transaction_count = len(transactions)
+        
+        # Calculate category breakdown
+        category_totals = {}
+        for t in transactions:
+            if t["type"] == "expense":
+                category = t["category"]
+                category_totals[category] = category_totals.get(category, 0) + t["amount"]
+        
+        # Create context for AI analysis
+        context = f"""
+        Financial Data Analysis for User:
+        - Total Expenses: ₹{total_expenses:,.2f}
+        - Total Income: ₹{total_income:,.2f}
+        - Net Amount: ₹{(total_income - total_expenses):,.2f}
+        - Transaction Count: {transaction_count}
+        - Category Breakdown: {category_totals}
+        - Analysis Period: Current month
+        
+        Transaction Details:
+        {[f"₹{t['amount']} - {t['category']} - {t['description']}" for t in transactions[:10]]}
+        """
+        
+        # Initialize AI chat
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"spendwise_analysis_{uuid.uuid4()}",
+            system_message="""You are a financial advisor AI for SpendWise, a personal finance app. 
+            Analyze the user's spending data and provide practical, actionable insights. 
+            Focus on spending patterns, budget optimization, and savings opportunities.
+            Always provide specific, realistic recommendations in Indian context."""
+        ).with_model("openai", "gpt-4o-mini")
+        
+        # Generate analysis based on type
+        if analysis_type == "spending_patterns":
+            prompt = f"""Analyze these spending patterns: {context}
+            
+            Provide:
+            1. Key spending patterns and trends
+            2. Areas of concern or overspending
+            3. Positive financial habits observed
+            4. Specific recommendations for improvement
+            
+            Format as JSON with 'insights', 'recommendations', and 'summary' arrays."""
+            
+        elif analysis_type == "budget_suggestions":
+            prompt = f"""Based on this financial data: {context}
+            
+            Suggest:
+            1. Optimal budget allocation per category
+            2. Areas to reduce spending
+            3. Savings goals and strategies
+            4. Emergency fund recommendations
+            
+            Format as JSON with 'insights', 'recommendations', and 'summary' arrays."""
+            
+        else:  # monthly_summary
+            prompt = f"""Create a monthly financial summary: {context}
+            
+            Include:
+            1. Overall financial health assessment
+            2. Month's key achievements and concerns
+            3. Comparison with typical spending patterns
+            4. Action items for next month
+            
+            Format as JSON with 'insights', 'recommendations', and 'summary' arrays."""
+        
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse AI response
+        try:
+            import json
+            ai_data = json.loads(response)
+            return ai_data
+        except json.JSONDecodeError:
+            # Fallback if AI doesn't return proper JSON
+            return {
+                "insights": [response[:200] + "..." if len(response) > 200 else response],
+                "recommendations": ["Review your spending patterns", "Set monthly budget limits", "Track expenses daily"],
+                "summary": "AI analysis completed successfully"
+            }
+            
+    except Exception as e:
+        logger.error(f"Error generating AI insights: {e}")
+        return {
+            "insights": ["Unable to generate AI insights at this time"],
+            "recommendations": ["Please try again later", "Consider reviewing your spending manually"],
+            "summary": "AI analysis service is temporarily unavailable"
+        }
+
+# AI Analysis Endpoints
+@app.post("/api/ai/analyze", response_model=AIAnalysisResponse)
+@limiter.limit("10/minute")
+async def analyze_expenses(
+    request: Request,
+    analysis_request: AIAnalysisRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate AI-powered expense analysis"""
+    try:
+        # Verify user owns the data
+        if analysis_request.user_id != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Fetch user transactions
+        transactions = await get_user_transactions_for_analysis(
+            analysis_request.user_id, 
+            analysis_request.time_period
+        )
+        
+        if not transactions:
+            return AIAnalysisResponse(
+                success=True,
+                analysis_type=analysis_request.analysis_type,
+                insights=["No transactions found for the selected period"],
+                recommendations=["Start tracking your expenses to get personalized insights"],
+                summary="Add some transactions to get AI-powered financial insights"
+            )
+        
+        # Generate AI analysis
+        ai_results = await generate_ai_insights(transactions, analysis_request.analysis_type)
+        
+        return AIAnalysisResponse(
+            success=True,
+            analysis_type=analysis_request.analysis_type,
+            insights=ai_results.get("insights", []),
+            recommendations=ai_results.get("recommendations", []),
+            summary=ai_results.get("summary", "Analysis completed")
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in AI analysis: {e}")
+        raise HTTPException(status_code=500, detail="Analysis service temporarily unavailable")
+
+@app.get("/api/ai/quick-insights")
+@limiter.limit("5/minute") 
+async def get_quick_insights(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get quick AI insights for dashboard"""
+    try:
+        # Get recent transactions
+        transactions = await get_user_transactions_for_analysis(current_user["user_id"], "current_month")
+        
+        if not transactions:
+            return {"insights": ["Start adding transactions to see AI insights!"]}
+        
+        # Generate quick summary
+        total_spent = sum(t["amount"] for t in transactions if t["type"] == "expense")
+        top_category = max(
+            transactions, 
+            key=lambda x: x["amount"] if x["type"] == "expense" else 0
+        )["category"] if transactions else "N/A"
+        
+        insights = [
+            f"You've spent ₹{total_spent:,.0f} this month",
+            f"Your highest expense category is {top_category}",
+            f"You have {len(transactions)} transactions this month"
+        ]
+        
+        return {"insights": insights}
+        
+    except Exception as e:
+        logger.error(f"Error generating quick insights: {e}")
+        return {"insights": ["Insights temporarily unavailable"]}
+
 @app.on_event("startup")
 async def startup_db_client():
     logger.info("SpendWise API starting up with enhanced security features...")
