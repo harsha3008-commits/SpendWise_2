@@ -9,7 +9,9 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Budget {
   id: string;
@@ -29,6 +31,8 @@ export default function BudgetsScreen() {
     category: '',
     period: 'monthly' as 'monthly' | 'weekly' | 'yearly',
   });
+
+  const { theme } = useTheme();
 
   const categories = [
     '🍽️ Food & Dining',
@@ -67,9 +71,9 @@ export default function BudgetsScreen() {
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage <= 60) return '#34C759';
-    if (percentage <= 80) return '#FF9500';
-    return '#FF3B30';
+    if (percentage <= 60) return theme.colors.success;
+    if (percentage <= 80) return theme.colors.warning;
+    return theme.colors.error;
   };
 
   const renderBudget = (budget: Budget) => {
@@ -77,20 +81,20 @@ export default function BudgetsScreen() {
     const progressColor = getProgressColor(percentage);
 
     return (
-      <View key={budget.id} style={styles.budgetCard}>
+      <View key={budget.id} style={[styles.budgetCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.budgetHeader}>
           <View>
-            <Text style={styles.budgetName}>{budget.name}</Text>
-            <Text style={styles.budgetCategory}>{budget.category}</Text>
+            <Text style={[styles.budgetName, { color: theme.colors.text }]}>{budget.name}</Text>
+            <Text style={[styles.budgetCategory, { color: theme.colors.textSecondary }]}>{budget.category}</Text>
           </View>
           <View style={styles.budgetAmounts}>
-            <Text style={styles.budgetSpent}>₹{budget.spent.toFixed(0)}</Text>
-            <Text style={styles.budgetTotal}>of ₹{budget.amount.toFixed(0)}</Text>
+            <Text style={[styles.budgetSpent, { color: theme.colors.text }]}>₹{budget.spent.toFixed(0)}</Text>
+            <Text style={[styles.budgetTotal, { color: theme.colors.textSecondary }]}>of ₹{budget.amount.toFixed(0)}</Text>
           </View>
         </View>
 
         <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
+          <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
             <View 
               style={[
                 styles.progressFill, 
@@ -107,10 +111,10 @@ export default function BudgetsScreen() {
         </View>
 
         <View style={styles.budgetFooter}>
-          <Text style={styles.budgetPeriod}>
+          <Text style={[styles.budgetPeriod, { color: theme.colors.textSecondary }]}>
             {budget.period.charAt(0).toUpperCase() + budget.period.slice(1)} budget
           </Text>
-          <Text style={styles.budgetRemaining}>
+          <Text style={[styles.budgetRemaining, { color: theme.colors.textSecondary }]}>
             ₹{(budget.amount - budget.spent).toFixed(0)} remaining
           </Text>
         </View>
@@ -118,21 +122,25 @@ export default function BudgetsScreen() {
     );
   };
 
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Budget Management</Text>
       </View>
 
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
-          <Text style={styles.sectionTitle}>Budget by Category</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Budget by Category</Text>
           <TouchableOpacity
             style={styles.addBudgetButton}
             onPress={() => setShowAddModal(true)}
           >
-            <Ionicons name="add-circle" size={20} color="#007AFF" />
-            <Text style={styles.addBudgetText}>Add Budget</Text>
+            <Ionicons name="add-circle" size={20} color={theme.colors.primary} />
+            <Text style={[styles.addBudgetText, { color: theme.colors.primary }]}>Add Budget</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -141,14 +149,14 @@ export default function BudgetsScreen() {
         {budgets.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyStateIcon}>
-              <Ionicons name="pie-chart-outline" size={80} color="#C7C7CC" />
+              <Ionicons name="pie-chart-outline" size={80} color={theme.colors.textSecondary} />
             </View>
-            <Text style={styles.emptyStateTitle}>No budgets set</Text>
-            <Text style={styles.emptyStateSubtitle}>
+            <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No budgets set</Text>
+            <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
               Set budgets for your expense categories to track your spending
             </Text>
             <TouchableOpacity
-              style={styles.createFirstBudgetButton}
+              style={[styles.createFirstBudgetButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => setShowAddModal(true)}
             >
               <Text style={styles.createFirstBudgetText}>Create First Budget</Text>
@@ -168,11 +176,13 @@ export default function BudgetsScreen() {
         presentationStyle="pageSheet"
       >
         <View style={styles.modalContainer}>
+          <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+          
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowAddModal(false)}>
               <Text style={styles.modalCancel}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Create Budget</Text>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Create Budget</Text>
             <TouchableOpacity onPress={addBudget}>
               <Text style={styles.modalSave}>Save</Text>
             </TouchableOpacity>
@@ -180,39 +190,43 @@ export default function BudgetsScreen() {
 
           <ScrollView style={styles.modalContent}>
             {/* Budget Name */}
-            <Text style={styles.inputLabel}>Budget Name</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Budget Name</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="e.g., Monthly Food Budget"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newBudget.name}
               onChangeText={(text) => setNewBudget({...newBudget, name: text})}
             />
 
             {/* Amount */}
-            <Text style={styles.inputLabel}>Budget Amount</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Budget Amount</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, color: theme.colors.text }]}
               placeholder="₹0"
+              placeholderTextColor={theme.colors.textSecondary}
               value={newBudget.amount}
               onChangeText={(text) => setNewBudget({...newBudget, amount: text})}
               keyboardType="numeric"
             />
 
             {/* Period */}
-            <Text style={styles.inputLabel}>Period</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Period</Text>
             <View style={styles.periodSelector}>
               {(['weekly', 'monthly', 'yearly'] as const).map((period) => (
                 <TouchableOpacity
                   key={period}
                   style={[
                     styles.periodButton,
-                    newBudget.period === period && styles.periodButtonSelected
+                    { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                    newBudget.period === period && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
                   ]}
                   onPress={() => setNewBudget({...newBudget, period})}
                 >
                   <Text style={[
                     styles.periodButtonText,
-                    newBudget.period === period && styles.periodButtonTextSelected
+                    { color: theme.colors.text },
+                    newBudget.period === period && { color: 'white' }
                   ]}>
                     {period.charAt(0).toUpperCase() + period.slice(1)}
                   </Text>
@@ -221,7 +235,7 @@ export default function BudgetsScreen() {
             </View>
 
             {/* Category */}
-            <Text style={styles.inputLabel}>Category</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.categorySelector}>
                 {categories.map((category) => (
@@ -229,13 +243,15 @@ export default function BudgetsScreen() {
                     key={category}
                     style={[
                       styles.categoryButton,
-                      newBudget.category === category && styles.categoryButtonSelected
+                      { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+                      newBudget.category === category && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
                     ]}
                     onPress={() => setNewBudget({...newBudget, category})}
                   >
                     <Text style={[
                       styles.categoryButtonText,
-                      newBudget.category === category && styles.categoryButtonTextSelected
+                      { color: theme.colors.text },
+                      newBudget.category === category && { color: 'white' }
                     ]}>{category}</Text>
                   </TouchableOpacity>
                 ))}
@@ -248,26 +264,28 @@ export default function BudgetsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
   },
   headerSection: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     paddingHorizontal: 20,
     paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   titleRow: {
     flexDirection: 'row',
@@ -277,7 +295,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   addBudgetButton: {
     flexDirection: 'row',
@@ -286,7 +303,6 @@ const styles = StyleSheet.create({
   },
   addBudgetText: {
     fontSize: 16,
-    color: '#007AFF',
     fontWeight: '600',
   },
   scrollView: {
@@ -305,18 +321,15 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 8,
   },
   emptyStateSubtitle: {
     fontSize: 16,
-    color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
   },
   createFirstBudgetButton: {
-    backgroundColor: '#007AFF',
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 25,
@@ -330,10 +343,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   budgetCard: {
-    backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
+    borderWidth: 1,
   },
   budgetHeader: {
     flexDirection: 'row',
@@ -344,12 +357,10 @@ const styles = StyleSheet.create({
   budgetName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 4,
   },
   budgetCategory: {
     fontSize: 14,
-    color: '#666',
   },
   budgetAmounts: {
     alignItems: 'flex-end',
@@ -357,11 +368,9 @@ const styles = StyleSheet.create({
   budgetSpent: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
   },
   budgetTotal: {
     fontSize: 14,
-    color: '#666',
   },
   progressContainer: {
     flexDirection: 'row',
@@ -372,7 +381,6 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 8,
-    backgroundColor: '#F2F2F7',
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -391,17 +399,15 @@ const styles = StyleSheet.create({
   },
   budgetPeriod: {
     fontSize: 12,
-    color: '#8E8E93',
     textTransform: 'uppercase',
     fontWeight: '600',
   },
   budgetRemaining: {
     fontSize: 14,
-    color: '#666',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -410,20 +416,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   modalCancel: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   modalSave: {
     fontSize: 17,
-    color: '#007AFF',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   modalContent: {
@@ -433,17 +440,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 8,
     marginTop: 20,
   },
   input: {
-    backgroundColor: 'white',
     borderRadius: 10,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
   },
   periodSelector: {
     flexDirection: 'row',
@@ -453,23 +457,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
     alignItems: 'center',
-  },
-  periodButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   periodButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-  },
-  periodButtonTextSelected: {
-    color: 'white',
   },
   categorySelector: {
     flexDirection: 'row',
@@ -478,20 +472,10 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-  },
-  categoryButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   categoryButtonText: {
     fontSize: 14,
-    color: '#000',
-  },
-  categoryButtonTextSelected: {
-    color: 'white',
   },
 });

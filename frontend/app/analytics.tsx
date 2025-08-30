@@ -7,10 +7,13 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function AnalyticsScreen() {
   const [isPremium, setIsPremium] = useState(false);
+  const { theme } = useTheme();
 
   const handleUpgrade = () => {
     Alert.alert(
@@ -23,8 +26,12 @@ export default function AnalyticsScreen() {
     );
   };
 
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Financial Analytics</Text>
       </View>
@@ -32,47 +39,47 @@ export default function AnalyticsScreen() {
       <ScrollView style={styles.scrollView}>
         {/* This Month's Summary */}
         <View style={styles.summaryCard}>
-          <Text style={styles.cardTitle}>This Month's Summary</Text>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>This Month's Summary</Text>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Income</Text>
-              <Text style={[styles.summaryValue, { color: '#34C759' }]}>₹0</Text>
+              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Income</Text>
+              <Text style={[styles.summaryValue, { color: theme.colors.income }]}>₹0</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Expenses</Text>
-              <Text style={[styles.summaryValue, { color: '#FF3B30' }]}>₹0</Text>
+              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Expenses</Text>
+              <Text style={[styles.summaryValue, { color: theme.colors.expense }]}>₹0</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Net</Text>
-              <Text style={[styles.summaryValue, { color: '#34C759' }]}>₹0</Text>
+              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Net</Text>
+              <Text style={[styles.summaryValue, { color: theme.colors.success }]}>₹0</Text>
             </View>
           </View>
         </View>
 
         {/* Basic Analytics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Analytics</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Basic Analytics</Text>
           
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Monthly Trend</Text>
-            <View style={styles.chartPlaceholder}>
-              <Ionicons name="bar-chart" size={60} color="#C7C7CC" />
-              <Text style={styles.chartPlaceholderText}>Bar Chart</Text>
-              <Text style={styles.chartSubtext}>Interactive charts coming soon</Text>
+            <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Monthly Trend</Text>
+            <View style={[styles.chartPlaceholder, { backgroundColor: theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F8F9FA' }]}>
+              <Ionicons name="bar-chart" size={60} color={theme.colors.textSecondary} />
+              <Text style={[styles.chartPlaceholderText, { color: theme.colors.textSecondary }]}>Bar Chart</Text>
+              <Text style={[styles.chartSubtext, { color: theme.colors.textSecondary }]}>Interactive charts coming soon</Text>
             </View>
             
             <View style={styles.monthlyData}>
               <View style={styles.monthRow}>
-                <Text style={styles.monthLabel}>Mar</Text>
-                <Text style={styles.monthValue}>₹0</Text>
+                <Text style={[styles.monthLabel, { color: theme.colors.textSecondary }]}>Mar</Text>
+                <Text style={[styles.monthValue, { color: theme.colors.text }]}>₹0</Text>
               </View>
               <View style={styles.monthRow}>
-                <Text style={styles.monthLabel}>Apr</Text>
-                <Text style={styles.monthValue}>₹0</Text>
+                <Text style={[styles.monthLabel, { color: theme.colors.textSecondary }]}>Apr</Text>
+                <Text style={[styles.monthValue, { color: theme.colors.text }]}>₹0</Text>
               </View>
               <View style={styles.monthRow}>
-                <Text style={styles.monthLabel}>May</Text>
-                <Text style={styles.monthValue}>₹0</Text>
+                <Text style={[styles.monthLabel, { color: theme.colors.textSecondary }]}>May</Text>
+                <Text style={[styles.monthValue, { color: theme.colors.text }]}>₹0</Text>
               </View>
             </View>
           </View>
@@ -81,40 +88,40 @@ export default function AnalyticsScreen() {
         {/* Advanced Analytics */}
         <View style={styles.section}>
           <View style={styles.premiumHeader}>
-            <Text style={styles.sectionTitle}>Advanced Analytics</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Advanced Analytics</Text>
             {!isPremium && (
-              <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
-                <Ionicons name="diamond" size={16} color="#FF9500" />
-                <Text style={styles.upgradeButtonText}>Upgrade</Text>
+              <TouchableOpacity style={[styles.upgradeButton, { backgroundColor: theme.mode === 'dark' ? 'rgba(255, 149, 0, 0.2)' : '#FFF3CD' }]} onPress={handleUpgrade}>
+                <Ionicons name="diamond" size={16} color={theme.colors.warning} />
+                <Text style={[styles.upgradeButtonText, { color: theme.colors.warning }]}>Upgrade</Text>
               </TouchableOpacity>
             )}
           </View>
 
           <View style={[styles.premiumCard, !isPremium && styles.premiumCardLocked]}>
             <View style={styles.premiumFeatureHeader}>
-              <Ionicons name="diamond" size={24} color="#FF9500" />
-              <Text style={styles.premiumFeatureTitle}>Recurring Transaction Detection</Text>
+              <Ionicons name="diamond" size={24} color={theme.colors.warning} />
+              <Text style={[styles.premiumFeatureTitle, { color: theme.colors.text }]}>Recurring Transaction Detection</Text>
             </View>
-            <Text style={styles.premiumFeatureDescription}>
+            <Text style={[styles.premiumFeatureDescription, { color: theme.colors.textSecondary }]}>
               Automatically identify and track your recurring expenses and income
             </Text>
             
             {!isPremium && (
-              <View style={styles.premiumOverlay}>
-                <Ionicons name="lock-closed" size={30} color="#8E8E93" />
-                <Text style={styles.premiumOverlayText}>Premium Feature</Text>
+              <View style={[styles.premiumOverlay, { backgroundColor: theme.mode === 'dark' ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)' }]}>
+                <Ionicons name="lock-closed" size={30} color={theme.colors.textSecondary} />
+                <Text style={[styles.premiumOverlayText, { color: theme.colors.textSecondary }]}>Premium Feature</Text>
               </View>
             )}
 
             {isPremium && (
               <View style={styles.recurringList}>
-                <View style={styles.recurringItem}>
-                  <Text style={styles.recurringName}>Monthly Rent</Text>
-                  <Text style={styles.recurringAmount}>₹15,000</Text>
+                <View style={[styles.recurringItem, { backgroundColor: theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F8F9FA' }]}>
+                  <Text style={[styles.recurringName, { color: theme.colors.text }]}>Monthly Rent</Text>
+                  <Text style={[styles.recurringAmount, { color: theme.colors.expense }]}>₹15,000</Text>
                 </View>
-                <View style={styles.recurringItem}>
-                  <Text style={styles.recurringName}>Netflix Subscription</Text>
-                  <Text style={styles.recurringAmount}>₹649</Text>
+                <View style={[styles.recurringItem, { backgroundColor: theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F8F9FA' }]}>
+                  <Text style={[styles.recurringName, { color: theme.colors.text }]}>Netflix Subscription</Text>
+                  <Text style={[styles.recurringAmount, { color: theme.colors.expense }]}>₹649</Text>
                 </View>
               </View>
             )}
@@ -124,40 +131,40 @@ export default function AnalyticsScreen() {
           {isPremium ? (
             <>
               <View style={styles.premiumCard}>
-                <Text style={styles.premiumFeatureTitle}>Cashflow Forecast</Text>
-                <Text style={styles.premiumFeatureDescription}>
+                <Text style={[styles.premiumFeatureTitle, { color: theme.colors.text }]}>Cashflow Forecast</Text>
+                <Text style={[styles.premiumFeatureDescription, { color: theme.colors.textSecondary }]}>
                   Predict your financial position for the next 3 months
                 </Text>
                 <View style={styles.forecastChart}>
-                  <Ionicons name="trending-up" size={40} color="#34C759" />
-                  <Text style={styles.forecastText}>Positive trend expected</Text>
+                  <Ionicons name="trending-up" size={40} color={theme.colors.success} />
+                  <Text style={[styles.forecastText, { color: theme.colors.success }]}>Positive trend expected</Text>
                 </View>
               </View>
 
               <View style={styles.premiumCard}>
-                <Text style={styles.premiumFeatureTitle}>Spending Insights</Text>
-                <Text style={styles.premiumFeatureDescription}>
+                <Text style={[styles.premiumFeatureTitle, { color: theme.colors.text }]}>Spending Insights</Text>
+                <Text style={[styles.premiumFeatureDescription, { color: theme.colors.textSecondary }]}>
                   AI-powered analysis of your spending patterns
                 </Text>
                 <View style={styles.insightsList}>
-                  <Text style={styles.insightItem}>• Food expenses increased 15% this month</Text>
-                  <Text style={styles.insightItem}>• Consider setting a budget for entertainment</Text>
-                  <Text style={styles.insightItem}>• Good job staying within transportation budget!</Text>
+                  <Text style={[styles.insightItem, { color: theme.colors.textSecondary }]}>• Food expenses increased 15% this month</Text>
+                  <Text style={[styles.insightItem, { color: theme.colors.textSecondary }]}>• Consider setting a budget for entertainment</Text>
+                  <Text style={[styles.insightItem, { color: theme.colors.textSecondary }]}>• Good job staying within transportation budget!</Text>
                 </View>
               </View>
             </>
           ) : (
             <View style={[styles.premiumCard, styles.premiumCardLocked]}>
-              <Text style={styles.premiumFeatureTitle}>More Premium Features</Text>
-              <Text style={styles.premiumFeatureDescription}>
+              <Text style={[styles.premiumFeatureTitle, { color: theme.colors.text }]}>More Premium Features</Text>
+              <Text style={[styles.premiumFeatureDescription, { color: theme.colors.textSecondary }]}>
                 • Cashflow forecasting{'\n'}
                 • AI spending insights{'\n'}
                 • Custom date ranges{'\n'}
                 • Export detailed reports{'\n'}
                 • Advanced filtering
               </Text>
-              <View style={styles.premiumOverlay}>
-                <TouchableOpacity style={styles.upgradeButtonLarge} onPress={handleUpgrade}>
+              <View style={[styles.premiumOverlay, { backgroundColor: theme.mode === 'dark' ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)' }]}>
+                <TouchableOpacity style={[styles.upgradeButtonLarge, { backgroundColor: theme.colors.primary }]} onPress={handleUpgrade}>
                   <Text style={styles.upgradeButtonLargeText}>Upgrade to Premium</Text>
                 </TouchableOpacity>
               </View>
@@ -167,12 +174,12 @@ export default function AnalyticsScreen() {
 
         {/* Category Breakdown */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Category Breakdown</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Category Breakdown</Text>
           <View style={styles.categoryCard}>
             <View style={styles.emptyState}>
-              <Ionicons name="pie-chart-outline" size={60} color="#8E8E93" />
-              <Text style={styles.emptyStateTitle}>No data to display</Text>
-              <Text style={styles.emptyStateSubtitle}>
+              <Ionicons name="pie-chart-outline" size={60} color={theme.colors.textSecondary} />
+              <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No data to display</Text>
+              <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
                 Add some transactions to see your spending breakdown
               </Text>
             </View>
@@ -183,35 +190,36 @@ export default function AnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
   },
   summaryCard: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     margin: 16,
     borderRadius: 16,
     padding: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 16,
   },
   summaryRow: {
@@ -223,7 +231,6 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#8E8E93',
     marginBottom: 4,
   },
   summaryValue: {
@@ -237,7 +244,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
     marginBottom: 16,
   },
   premiumHeader: {
@@ -249,7 +255,6 @@ const styles = StyleSheet.create({
   upgradeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF3CD',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -258,35 +263,32 @@ const styles = StyleSheet.create({
   upgradeButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#FF9500',
   },
   chartCard: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 16,
   },
   chartPlaceholder: {
     alignItems: 'center',
     paddingVertical: 40,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
     marginBottom: 20,
   },
   chartPlaceholderText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#8E8E93',
     marginTop: 8,
   },
   chartSubtext: {
     fontSize: 12,
-    color: '#C7C7CC',
     marginTop: 4,
   },
   monthlyData: {
@@ -299,19 +301,19 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     fontSize: 14,
-    color: '#666',
   },
   monthValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
   },
   premiumCard: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     position: 'relative',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   premiumCardLocked: {
     opacity: 0.7,
@@ -325,11 +327,9 @@ const styles = StyleSheet.create({
   premiumFeatureTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
   },
   premiumFeatureDescription: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
   },
   premiumOverlay: {
@@ -338,7 +338,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
@@ -346,11 +345,9 @@ const styles = StyleSheet.create({
   premiumOverlayText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#8E8E93',
     marginTop: 8,
   },
   upgradeButtonLarge: {
-    backgroundColor: '#007AFF',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
@@ -370,17 +367,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#F8F9FA',
     borderRadius: 8,
   },
   recurringName: {
     fontSize: 14,
-    color: '#000',
   },
   recurringAmount: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FF3B30',
   },
   forecastChart: {
     alignItems: 'center',
@@ -389,7 +383,6 @@ const styles = StyleSheet.create({
   },
   forecastText: {
     fontSize: 14,
-    color: '#34C759',
     fontWeight: '600',
     marginTop: 8,
   },
@@ -399,13 +392,14 @@ const styles = StyleSheet.create({
   },
   insightItem: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
   },
   categoryCard: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   emptyState: {
     alignItems: 'center',
@@ -414,13 +408,11 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtitle: {
     fontSize: 14,
-    color: '#8E8E93',
     textAlign: 'center',
   },
 });
