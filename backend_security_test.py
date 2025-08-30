@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
 # Configuration
-BASE_URL = "https://secure-wallet-3.preview.emergentagent.com/api"
+BASE_URL = "https://fintrack-app-20.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 class SpendWiseSecurityTester:
@@ -581,7 +581,7 @@ class SpendWiseSecurityTester:
         """Test CORS configuration and whitelist"""
         # Test preflight request
         cors_headers = {
-            "Origin": "https://secure-wallet-3.preview.emergentagent.com",
+            "Origin": "https://fintrack-app-20.preview.emergentagent.com",
             "Access-Control-Request-Method": "POST",
             "Access-Control-Request-Headers": "Content-Type,Authorization"
         }

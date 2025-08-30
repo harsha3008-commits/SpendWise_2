@@ -85,7 +85,7 @@ api_router = APIRouter(prefix="/api")
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8081",  # Expo dev server
-    "https://secure-wallet-3.preview.emergentagent.com",
+    "https://fintrack-app-20.preview.emergentagent.com",
     # Add production domains here
 ]
 
