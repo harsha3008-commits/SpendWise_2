@@ -519,12 +519,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Security Hardening - Backend Server"
-    - "Security Hardening - Input Validation Models" 
-    - "Authentication & JWT Security"
-    - "Payment Security & Razorpay Hardening"
-    - "Security Hardening - Crypto Enhancement"
-  stuck_tasks: []
+    - "Frontend-Backend JWT Authentication Integration"
+    - "Dashboard API Integration"
+    - "Razorpay Payment Integration with Security"
+  stuck_tasks:
+    - "Frontend-Backend JWT Authentication Integration"
+    - "Dashboard API Integration"
+    - "Razorpay Payment Integration with Security"
   test_all: false
   test_priority: "high_first"
 
