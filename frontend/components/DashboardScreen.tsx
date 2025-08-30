@@ -55,7 +55,13 @@ export default function DashboardScreen() {
   };
 
   const handleLogout = async () => {
-    await logout();
+    try {
+      console.log('Logging out user...');
+      await logout();
+      console.log('Logout successful');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const styles = createStyles(theme);
