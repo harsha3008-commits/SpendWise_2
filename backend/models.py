@@ -159,7 +159,7 @@ class CategoryCreate(BaseModel):
     """Category creation model"""
     name: str = Field(..., min_length=1, max_length=50, description="Category name")
     type: TransactionType = Field(..., description="Category type")
-    color: str = Field(..., regex=r'^#[0-9A-Fa-f]{6}$', description="Hex color code")
+    color: str = Field(..., pattern=r'^#[0-9A-Fa-f]{6}$', description="Hex color code")
     icon: Optional[str] = Field(None, max_length=50, description="Icon name")
     description: Optional[str] = Field(None, max_length=200, description="Category description")
     
