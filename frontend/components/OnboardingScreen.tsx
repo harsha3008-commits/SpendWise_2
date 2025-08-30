@@ -17,6 +17,7 @@ import {
   deriveKey, 
   storeEncryptionKey, 
   storeSalt, 
+  getSalt,
   sha256,
   generateSecurePassphrase,
   createBackupKey
