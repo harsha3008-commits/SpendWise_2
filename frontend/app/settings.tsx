@@ -40,6 +40,14 @@ export default function SettingsScreen() {
     notifications: true,
     locationAccess: false,
   });
+  
+  // Premium settings state
+  const [isPremium, setIsPremium] = useState(false);
+  const [premiumFeatures, setPremiumFeatures] = useState({
+    aiAnalysis: false,
+    monthlyReports: false,
+    prioritySupport: false,
+  });
 
   const handleLogout = async () => {
     Alert.alert(
