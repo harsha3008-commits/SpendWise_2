@@ -682,16 +682,30 @@ logger = logging.getLogger(__name__)
 async def startup_db_client():
     logger.info("SpendWise API starting up with enhanced security features...")
     
-    # Create indexes for performance and security
-    await db.transactions.create_index([("user_id", 1), ("timestamp", -1)])
-    await db.transactions.create_index([("categoryId", 1)])
-    await db.transactions.create_index([("type", 1)])
-    await db.payment_orders.create_index([("order_id", 1)], unique=True)
-    await db.payment_orders.create_index([("user_id", 1), ("created_at", -1)])
-    await db.subscriptions.create_index([("user_id", 1)], unique=True)
-    await db.users.create_index([("email", 1)], unique=True)
-    await db.idempotent_requests.create_index([("idempotency_key", 1)], unique=True)
-    await db.idempotent_requests.create_index([("expires_at", 1)], expireAfterSeconds=0)
+    try:
+        # Create indexes for performance and security
+        # Handle existing indexes gracefully
+        await db.transactions.create_index([("user_id", 1), ("timestamp", -1)])
+        await db.transactions.create_index([("categoryId", 1)])
+        await db.transactions.create_index([("type", 1)])
+        
+        # Drop and recreate payment_orders index to ensure uniqueness
+        try:
+            await db.payment_orders.drop_index("order_id_1")
+        except Exception:
+            pass  # Index might not exist
+        await db.payment_orders.create_index([("order_id", 1)], unique=True)
+        
+        await db.payment_orders.create_index([("user_id", 1), ("created_at", -1)])
+        await db.subscriptions.create_index([("user_id", 1)], unique=True)
+        await db.users.create_index([("email", 1)], unique=True)
+        await db.idempotent_requests.create_index([("idempotency_key", 1)], unique=True)
+        await db.idempotent_requests.create_index([("expires_at", 1)], expireAfterSeconds=0)
+        
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.error(f"Error creating indexes: {e}")
+        # Continue startup even if index creation fails
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
