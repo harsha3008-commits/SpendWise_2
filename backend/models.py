@@ -183,7 +183,7 @@ class BudgetCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100, description="Budget name")
     categoryId: str = Field(..., min_length=1, max_length=50, description="Category ID")
     amount: float = Field(..., gt=0, le=10000000, description="Budget amount")
-    period: str = Field(..., regex=r'^(weekly|monthly|yearly)$', description="Budget period")
+    period: str = Field(..., pattern=r'^(weekly|monthly|yearly)$', description="Budget period")
     startDate: int = Field(..., ge=0, description="Start date timestamp")
     endDate: int = Field(..., ge=0, description="End date timestamp")
     alertThreshold: Optional[float] = Field(80.0, ge=0, le=100, description="Alert threshold %")
@@ -213,7 +213,7 @@ class BillCreate(BaseModel):
     categoryId: str = Field(..., min_length=1, max_length=50, description="Category ID")
     dueDate: int = Field(..., ge=0, description="Due date timestamp")
     isRecurring: bool = Field(False, description="Is recurring bill")
-    recurringPeriod: Optional[str] = Field(None, regex=r'^(weekly|monthly|quarterly|yearly)$')
+    recurringPeriod: Optional[str] = Field(None, pattern=r'^(weekly|monthly|quarterly|yearly)$')
     reminder: Optional[int] = Field(None, ge=0, le=30, description="Reminder days before due")
     notes: Optional[str] = Field(None, max_length=500, description="Bill notes")
     
