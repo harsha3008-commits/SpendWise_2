@@ -18,14 +18,7 @@
         "backgroundColor": "#10B981"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.spendwise.app",
-      "permissions": [
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.POST_NOTIFICATIONS"
-      ]
+      "package": "com.spendwise.app"
     },
     "web": {
       "bundler": "metro",
@@ -34,8 +27,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-notifications",
-      "expo-local-authentication",
       [
         "expo-splash-screen",
         {
