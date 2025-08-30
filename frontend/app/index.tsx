@@ -1,16 +1,74 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { isAppInitialized, getEncryptionKey } from '../lib/storage';
+import OnboardingScreen from '../components/OnboardingScreen';
+import AuthScreen from '../components/AuthScreen';
+import DashboardScreen from '../components/DashboardScreen';
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+export default function IndexScreen() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [appState, setAppState] = useState<'onboarding' | 'auth' | 'dashboard'>('onboarding');
 
-export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  useEffect(() => {
+    checkAppState();
+  }, []);
+
+  const checkAppState = async () => {
+    try {
+      const initialized = await isAppInitialized();
+      
+      if (!initialized) {
+        setAppState('onboarding');
+      } else {
+        const encryptionKey = await getEncryptionKey();
+        if (encryptionKey) {
+          setAppState('dashboard');
+        } else {
+          setAppState('auth');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking app state:', error);
+      setAppState('onboarding');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    setAppState('dashboard');
+  };
+
+  const handleAuthSuccess = () => {
+    setAppState('dashboard');
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#10B981" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
+      <StatusBar style="auto" />
+      
+      {appState === 'onboarding' && (
+        <OnboardingScreen onComplete={handleOnboardingComplete} />
+      )}
+      
+      {appState === 'auth' && (
+        <AuthScreen onAuthSuccess={handleAuthSuccess} />
+      )}
+      
+      {appState === 'dashboard' && (
+        <DashboardScreen />
+      )}
     </View>
   );
 }
@@ -18,13 +76,12 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#0F172A',
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0F172A',
   },
 });
