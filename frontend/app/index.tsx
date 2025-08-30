@@ -1,77 +1,116 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isAuthenticated } from '../lib/auth';
+import { analyticsAPI, transactionAPI } from '../lib/api';
+import LoginScreen from '../components/LoginScreen';
+import RegisterScreen from '../components/RegisterScreen';
 
-export default function DashboardScreen() {
-  const [appState, setAppState] = useState<'loading' | 'onboarding' | 'dashboard'>('loading');
-  const [stats, setStats] = useState({
-    income: 0,
-    expenses: 0,
+type AppState = 'loading' | 'login' | 'register' | 'dashboard';
+
+interface DashboardStats {
+  totalIncome: number;
+  totalExpenses: number;
+  netWorth: number;
+  transactionCount: number;
+}
+
+export default function MainScreen() {
+  const [appState, setAppState] = useState<AppState>('loading');
+  const [stats, setStats] = useState<DashboardStats>({
+    totalIncome: 0,
+    totalExpenses: 0,
     netWorth: 0,
-    unpaidBills: 0
+    transactionCount: 0
   });
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   useEffect(() => {
-    checkAppState();
+    checkAuthStatus();
   }, []);
 
-  const checkAppState = async () => {
+  useEffect(() => {
+    if (appState === 'dashboard') {
+      loadDashboardData();
+    }
+  }, [appState]);
+
+  const checkAuthStatus = async () => {
     try {
-      const initialized = await AsyncStorage.getItem('spendwise_initialized');
-      if (!initialized) {
-        setAppState('onboarding');
-      } else {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
         setAppState('dashboard');
+      } else {
+        setAppState('login');
       }
     } catch (error) {
-      console.error('Error checking app state:', error);
-      setAppState('onboarding');
+      console.error('Error checking auth status:', error);
+      setAppState('login');
     }
   };
 
-  const handleGetStarted = async () => {
+  const loadDashboardData = async () => {
+    setIsLoadingStats(true);
     try {
-      await AsyncStorage.setItem('spendwise_initialized', 'true');
-      setAppState('dashboard');
+      // Load analytics summary
+      const analyticsData = await analyticsAPI.getSummary();
+      
+      setStats({
+        totalIncome: analyticsData.totalIncome || 0,
+        totalExpenses: analyticsData.totalExpenses || 0,
+        netWorth: analyticsData.netWorth || 0,
+        transactionCount: analyticsData.transactionCount || 0
+      });
     } catch (error) {
-      console.error('Error initializing app:', error);
+      console.error('Error loading dashboard data:', error);
+      // Don't show error alert for failed API calls to avoid spamming user
+      // Keep the default zero values
+    } finally {
+      setIsLoadingStats(false);
     }
+  };
+
+  const handleAuthSuccess = () => {
+    setAppState('dashboard');
   };
 
   const formatCurrency = (amount: number) => {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
 
-  if (appState === 'onboarding') {
+  // Loading state
+  if (appState === 'loading') {
     return (
-      <View style={styles.onboardingContainer}>
+      <View style={styles.loadingContainer}>
         <StatusBar style="light" />
-        <View style={styles.onboardingContent}>
-          <Ionicons name="shield-checkmark" size={80} color="#10B981" style={styles.onboardingIcon} />
-          <Text style={styles.onboardingTitle}>SpendWise</Text>
-          <Text style={styles.onboardingSubtitle}>
-            Privacy-First Finance Management
-          </Text>
-          <Text style={styles.onboardingDescription}>
-            • All data encrypted locally on your device{'\n'}
-            • Blockchain-style transaction verification{'\n'}
-            • No data sent to external servers{'\n'}
-            • You control your financial privacy
-          </Text>
-          
-          <TouchableOpacity
-            style={styles.getStartedButton}
-            onPress={handleGetStarted}
-          >
-            <Text style={styles.getStartedButtonText}>Get Started</Text>
-          </TouchableOpacity>
-        </View>
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text style={styles.loadingText}>Loading SpendWise...</Text>
       </View>
     );
   }
 
+  // Login screen
+  if (appState === 'login') {
+    return (
+      <LoginScreen
+        onLoginSuccess={handleAuthSuccess}
+        onSwitchToRegister={() => setAppState('register')}
+      />
+    );
+  }
+
+  // Register screen
+  if (appState === 'register') {
+    return (
+      <RegisterScreen
+        onRegisterSuccess={handleAuthSuccess}
+        onSwitchToLogin={() => setAppState('login')}
+      />
+    );
+  }
+
+  // Dashboard screen
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -90,28 +129,42 @@ export default function DashboardScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Stats Cards */}
         <View style={styles.statsSection}>
-          <View style={styles.statsGrid}>
-            <View style={[styles.statsCard, styles.incomeCard]}>
-              <Text style={styles.statsLabel}>This Month's Income</Text>
-              <Text style={[styles.statsValue, { color: '#34C759' }]}>
-                {formatCurrency(stats.income)}
-              </Text>
+          {isLoadingStats ? (
+            <View style={styles.loadingStats}>
+              <ActivityIndicator size="small" color="#10B981" />
+              <Text style={styles.loadingStatsText}>Loading financial data...</Text>
             </View>
-            
-            <View style={[styles.statsCard, styles.expenseCard]}>
-              <Text style={styles.statsLabel}>This Month's Expense</Text>
-              <Text style={[styles.statsValue, { color: '#FF3B30' }]}>
-                {formatCurrency(stats.expenses)}
-              </Text>
+          ) : (
+            <View style={styles.statsGrid}>
+              <View style={[styles.statsCard, styles.incomeCard]}>
+                <Text style={styles.statsLabel}>This Month's Income</Text>
+                <Text style={[styles.statsValue, { color: '#34C759' }]}>
+                  {formatCurrency(stats.totalIncome)}
+                </Text>
+              </View>
+              
+              <View style={[styles.statsCard, styles.expenseCard]}>
+                <Text style={styles.statsLabel}>This Month's Expense</Text>
+                <Text style={[styles.statsValue, { color: '#FF3B30' }]}>
+                  {formatCurrency(stats.totalExpenses)}
+                </Text>
+              </View>
+              
+              <View style={[styles.statsCard, styles.netWorthCard]}>
+                <Text style={styles.statsLabel}>Net Worth</Text>
+                <Text style={[styles.statsValue, { color: stats.netWorth >= 0 ? '#34C759' : '#FF3B30' }]}>
+                  {formatCurrency(stats.netWorth)}
+                </Text>
+              </View>
+
+              <View style={[styles.statsCard, styles.transactionCard]}>
+                <Text style={styles.statsLabel}>Total Transactions</Text>
+                <Text style={[styles.statsValue, { color: '#007AFF' }]}>
+                  {stats.transactionCount}
+                </Text>
+              </View>
             </View>
-            
-            <View style={[styles.statsCard, styles.netWorthCard]}>
-              <Text style={styles.statsLabel}>Net Worth</Text>
-              <Text style={[styles.statsValue, { color: '#34C759' }]}>
-                {formatCurrency(stats.netWorth)}
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
 
         {/* Quick Actions */}
@@ -145,16 +198,19 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Welcome to SpendWise! 🎉</Text>
           <View style={styles.welcomeCard}>
             <View style={styles.welcomeContent}>
-              <Ionicons name="rocket" size={48} color="#007AFF" style={styles.welcomeIcon} />
-              <Text style={styles.welcomeTitle}>Your privacy-first finance app is ready!</Text>
+              <Ionicons name="shield-checkmark" size={48} color="#007AFF" style={styles.welcomeIcon} />
+              <Text style={styles.welcomeTitle}>Your secure finance app is ready!</Text>
               <Text style={styles.welcomeDescription}>
-                Start by adding your first transaction to begin tracking your finances securely.
+                {stats.transactionCount > 0 
+                  ? `You have ${stats.transactionCount} transactions tracked securely with blockchain verification.`
+                  : 'Start by adding your first transaction to begin tracking your finances securely.'
+                }
               </Text>
               
               <View style={styles.featuresList}>
                 <View style={styles.featureItem}>
                   <Ionicons name="checkmark-circle" size={16} color="#34C759" />
-                  <Text style={styles.featureText}>All data encrypted locally</Text>
+                  <Text style={styles.featureText}>JWT Authentication Active</Text>
                 </View>
                 <View style={styles.featureItem}>
                   <Ionicons name="checkmark-circle" size={16} color="#34C759" />
@@ -162,12 +218,14 @@ export default function DashboardScreen() {
                 </View>
                 <View style={styles.featureItem}>
                   <Ionicons name="checkmark-circle" size={16} color="#34C759" />
-                  <Text style={styles.featureText}>Complete financial privacy</Text>
+                  <Text style={styles.featureText}>End-to-end encrypted data</Text>
                 </View>
               </View>
               
               <TouchableOpacity style={styles.getStartedSmallButton}>
-                <Text style={styles.getStartedSmallButtonText}>Add First Transaction</Text>
+                <Text style={styles.getStartedSmallButtonText}>
+                  {stats.transactionCount > 0 ? 'View Transactions' : 'Add First Transaction'}
+                </Text>
                 <Ionicons name="arrow-forward" size={16} color="#007AFF" />
               </TouchableOpacity>
             </View>
