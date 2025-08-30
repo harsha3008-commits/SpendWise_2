@@ -189,8 +189,8 @@ class PaymentOrder(BaseModel):
         return v
 
 class PaymentVerification(BaseModel):
-    razorpay_order_id: str = Field(..., regex=r'^order_[A-Za-z0-9]+$')
-    razorpay_payment_id: str = Field(..., regex=r'^pay_[A-Za-z0-9]+$')
+    razorpay_order_id: str = Field(..., pattern=r'^order_[A-Za-z0-9]+$')
+    razorpay_payment_id: str = Field(..., pattern=r'^pay_[A-Za-z0-9]+$')
     razorpay_signature: str = Field(..., min_length=64, max_length=256)
 
 class IdempotencyRequest(BaseModel):
