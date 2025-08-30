@@ -243,50 +243,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F2F2F7',
   },
-  onboardingContainer: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: '#1F2937',
-  },
-  onboardingContent: {
-    flex: 1,
-    paddingHorizontal: 24,
+    backgroundColor: '#0F172A',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  onboardingIcon: {
-    marginBottom: 24,
-  },
-  onboardingTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#10B981',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  onboardingSubtitle: {
-    fontSize: 18,
+  loadingText: {
+    fontSize: 16,
     color: '#F1F5F9',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  onboardingDescription: {
-    fontSize: 16,
-    color: '#94A3B8',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 40,
-  },
-  getStartedButton: {
-    width: '100%',
-    paddingVertical: 16,
-    backgroundColor: '#10B981',
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  getStartedButtonText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: '600',
+    marginTop: 16,
   },
   header: {
     flexDirection: 'row',
@@ -325,6 +291,18 @@ const styles = StyleSheet.create({
   statsSection: {
     padding: 16,
   },
+  loadingStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    gap: 12,
+  },
+  loadingStatsText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
   statsGrid: {
     gap: 16,
   },
@@ -342,6 +320,9 @@ const styles = StyleSheet.create({
   },
   netWorthCard: {
     borderLeftColor: '#007AFF',
+  },
+  transactionCard: {
+    borderLeftColor: '#FF9500',
   },
   statsLabel: {
     fontSize: 14,
