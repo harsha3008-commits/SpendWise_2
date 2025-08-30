@@ -540,7 +540,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All critical JWT authentication and API integration tasks completed"
+    - "User Management Endpoints for Settings"
+    - "Enhanced Settings Screen Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
