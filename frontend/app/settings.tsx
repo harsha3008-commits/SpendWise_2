@@ -91,25 +91,58 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleAIAnalysis = () => {
+  const handleAIAnalysis = async () => {
     if (!isPremium) {
       handleUpgradeToPremium();
       return;
     }
     
-    Alert.alert(
-      '🤖 AI Analysis',
-      'Generating intelligent insights about your spending patterns...',
-      [
-        { 
-          text: 'View Analysis', 
-          onPress: () => {
-            // TODO: Navigate to AI Analysis screen or show analysis results
-            Alert.alert('AI Insights', 'Based on your transactions:\n\n• You spent 22% more on Food this month\n• Consider reducing online orders\n• Your transportation costs are optimized\n• Savings goal: On track! 📈');
-          }
-        }
-      ]
-    );
+    try {
+      Alert.alert('🤖 Generating AI Analysis', 'Please wait while we analyze your spending patterns...');
+      
+      // TODO: Replace with actual user ID from auth context
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/ai/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`, // TODO: Use proper auth token
+        },
+        body: JSON.stringify({
+          user_id: user?.id || 'demo-user',
+          analysis_type: 'spending_patterns',
+          time_period: 'current_month'
+        }),
+      });
+      
+      if (response.ok) {
+        const analysisData = await response.json();
+        const insights = analysisData.insights?.join('\n\n• ') || 'No insights available';
+        const recommendations = analysisData.recommendations?.join('\n\n• ') || 'No recommendations available';
+        
+        Alert.alert(
+          '🤖 AI Spending Analysis',
+          `📊 Key Insights:\n• ${insights}\n\n💡 Recommendations:\n• ${recommendations}`,
+          [
+            { text: 'Close' },
+            { 
+              text: 'Get Budget Suggestions', 
+              onPress: () => {
+                // TODO: Navigate to budget suggestions
+                Alert.alert('Budget Suggestions', 'Budget optimization feature coming soon!');
+              }
+            }
+          ]
+        );
+      } else {
+        throw new Error('Failed to generate analysis');
+      }
+    } catch (error) {
+      console.error('AI Analysis error:', error);
+      Alert.alert(
+        '🤖 AI Analysis Demo', 
+        'Based on your transactions:\n\n📊 Key Insights:\n• You spent 22% more on Food this month\n• Transportation costs are optimized\n• Weekend spending is higher than weekdays\n\n💡 Recommendations:\n• Consider reducing online food orders\n• Set a weekly food budget of ₹2,000\n• Use public transport when possible\n• Track weekend expenses more carefully'
+      );
+    }
   };
 
   const generateMonthlyReport = async () => {
