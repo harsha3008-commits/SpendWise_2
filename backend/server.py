@@ -899,7 +899,7 @@ async def get_quick_insights(
     """Get quick AI insights for dashboard"""
     try:
         # Get recent transactions
-        transactions = await get_user_transactions_for_analysis(current_user["user_id"], "current_month")
+        transactions = await get_user_transactions_for_analysis(current_user["id"], "current_month")
         
         if not transactions:
             return {"insights": ["Start adding transactions to see AI insights!"]}
