@@ -73,12 +73,13 @@ export default function SettingsScreen() {
         
         setSmsStats(stats);
 
-        // Load user profile from backend
+        // Load user profile and premium status from backend
         if (user?.id) {
           try {
             const token = await AsyncStorage.getItem('access_token');
             if (token) {
-              const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/${user.id}`, {
+              // Load user profile
+              const userResponse = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/${user.id}`, {
                 method: 'GET',
                 headers: {
                   'Authorization': `Bearer ${token}`,
@@ -86,16 +87,35 @@ export default function SettingsScreen() {
                 },
               });
 
-              if (response.ok) {
-                const userProfile = await response.json();
+              if (userResponse.ok) {
+                const userProfile = await userResponse.json();
                 setProfileData({
                   name: userProfile.full_name || userProfile.email,
                   email: userProfile.email,
                 });
               }
+
+              // Load premium status
+              const premiumResponse = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/premium/status`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              if (premiumResponse.ok) {
+                const premiumData = await premiumResponse.json();
+                setIsPremium(premiumData.isPremium || false);
+                setPremiumFeatures({
+                  aiAnalysis: premiumData.features?.aiAnalysis || false,
+                  monthlyReports: premiumData.features?.monthlyReports || false,
+                  prioritySupport: premiumData.features?.prioritySupport || false,
+                });
+              }
             }
           } catch (profileError) {
-            console.warn('Failed to load user profile from backend:', profileError);
+            console.warn('Failed to load user data from backend:', profileError);
             // Fallback to user data from auth context
             setProfileData({
               name: user?.full_name || user?.email || 'SpendWise User',
