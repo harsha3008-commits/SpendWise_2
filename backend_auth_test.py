@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
 # Configuration
-BASE_URL = "https://fintrack-app-20.preview.emergentagent.com/api"
+BASE_URL = "https://privacyfin.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 class AuthSettingsAPITester:

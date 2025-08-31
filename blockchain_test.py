@@ -8,7 +8,7 @@ import json
 import hashlib
 from datetime import datetime
 
-BASE_URL = "https://fintrack-app-20.preview.emergentagent.com/api"
+BASE_URL = "https://privacyfin.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 def compute_expected_hash(tx_data):

@@ -1,66 +1,73 @@
 <analysis>
-The trajectory details the continued development of SpendWise, a privacy-first finance app. Initially, the focus was on critical security hardening, including updating , enhancing  for AES-GCM and proper key derivation, hardening  with CORS, rate limiting, JWT, and Razorpay verification, and input validation via Pydantic models.
+The trajectory details the evolution of SpendWise, a privacy-first finance app. Initially, the AI engineer completed critical dark mode consistency fixes and addressed logout redirection issues. The user then introduced a major feature set: a background SMS reader, transaction analysis, and a fully functional settings page, prioritizing them as Settings -> SMS Reader -> Analytics.
 
-The AI engineer resolved several technical issues: migrating Pydantic regex to pattern, addressing MongoDB index conflicts, and debugging persistent Expo frontend service issues (port conflicts, ngrok tunnel problems). Extensive backend and frontend testing confirmed security features (JWT auth, Razorpay verification) were functional, but revealed a critical disconnect in frontend-backend integration, particularly for JWT authentication and data fetching.
+The AI successfully implemented the Settings screen, adding profile management, notifications, and data controls. Subsequently, premium features (AI analysis, monthly reports) were integrated into Settings, requiring  for LLM capabilities and backend endpoints. A significant blank screen issue was resolved by fixing 's loading state.
 
-Subsequently, the AI integrated JWT authentication into the frontend, created dedicated login/register screens, and established an . Recent efforts focused on implementing mandatory login and a light/dark theme toggle, followed by user feedback to ensure dark mode consistency across all app sections and correct logout redirection. The AI is currently addressing these theme consistency and logout navigation issues.
+The core differentiating feature, automatic Android SMS transaction parsing, was then implemented, achieving 80% accuracy. The user requested further enhancements for launch, including 90%+ accuracy, UI/UX polish, stability, compliance, monetization, and app store packaging. The current work focuses on making all elements of the Settings screen, such as detection statistics, data export/erase, two-factor authentication, and premium upgrade options, fully functional.
 </analysis>
 
 <product_requirements>
-SpendWise is a local-first, privacy-first mobile finance app for Android/iOS, featuring a blockchain-style, tamper-resistant ledger with all financial data encrypted on-device. Core functionalities include expense/income tracking, budgets, bill reminders, and basic analytics. Monetization is through a premium subscription for advanced analytics, export, and optional encrypted multi-device sync (IPFS). The app must function offline. The tech stack includes Expo/React Native, TypeScript, FastAPI, MongoDB, Dexie (IndexedDB) with AES encryption, WebCrypto (AES-GCM, PBKDF2/Argon2), Razorpay, and Polygon for blockchain anchoring. Security is paramount, with server-side Razorpay signature verification and secure key storage. Required screens are onboarding, dashboard, transactions, bills, budgets, analytics, subscriptions, and settings. Recent explicit requests include enforcing mandatory login, a default light mode UI, and a dark mode toggle in settings, with theme persistence and proper logout redirection.
+SpendWise is a local-first, privacy-first mobile finance app for Android/iOS. It uses an encrypted, blockchain-style ledger for tamper-resistant financial data. Core features include expense/income tracking, budgeting, bill reminders, and basic analytics. Monetization occurs via a premium subscription for advanced analytics, data export (PDF/CSV), and optional encrypted multi-device sync (IPFS). The app must support offline functionality. The tech stack includes Expo/React Native, FastAPI, MongoDB, Dexie, WebCrypto (AES-GCM, PBKDF2/Argon2), Razorpay, and Polygon. Security features include server-side Razorpay verification and secure key storage. Mandatory login, default light mode with a dark mode toggle, and persistent theme selection are required. Recent explicit requests include:
+1.  **Background SMS Listener (Android-only):** Automatic parsing of transactional SMS for amount, type, merchant, date, and reference, storing them locally and updating the UI instantly.
+2.  **Transaction Analysis & Monthly Expense Report:** Auto-categorization of expenses, monthly summaries (total spent/received, category pie chart, trend graph), and a Download Report (PDF/CSV) option.
+3.  **Fully Functional Settings Page:** Profile management (edit name, email, password, picture), theme selection (light/dark with persistence), notifications (transaction/budget alerts), privacy & permissions (SMS/notification management, data export/erase), and a Premium section with upgrade options, AI expense analysis, and report generation.
+4.  **Improve SMS parsing accuracy to 90%+**, UI/UX polish, app stability, compliance, and app store packaging for launch.
 </product_requirements>
 
 <key_technical_concepts>
-- **Local-first, Privacy-first:** Encrypted on-device data storage.
-- **Blockchain-style Ledger:** Hash-chained transactions for tamper resistance.
-- **WebCrypto (AES-GCM, PBKDF2/Argon2):** Secure authenticated encryption and key derivation.
-- **Expo/React Native:** Cross-platform mobile UI development.
-- **FastAPI/MongoDB:** Backend API and data persistence.
-- **JWT (JSON Web Tokens):** Secure authentication and authorization.
-- **Razorpay:** Payment gateway with server-side signature verification.
-- **React Context:** Global state management for authentication and theming.
+-   **Local-first, Privacy-first:** Encrypted on-device data storage.
+-   **WebCrypto (AES-GCM, PBKDF2/Argon2):** Secure encryption and key derivation.
+-   **Expo/React Native:** Cross-platform mobile UI development.
+-   **FastAPI/MongoDB:** Backend API and data persistence.
+-   **JWT:** Secure authentication/authorization.
+-   **Razorpay:** Payment gateway.
+-   **React Context:** Global state management (Auth, Theme).
+-   **Emergent LLM Key/emergentintegrations:** AI analysis integration.
+-   **React Native SMS Libraries:** Android-specific background SMS reading.
 </key_technical_concepts>
 
 <code_architecture>
-The application utilizes a monorepo structure, separating  (Expo/React Native) and  (FastAPI/MongoDB).
+The application employs a monorepo structure, separating  (Expo/React Native) and  (FastAPI/MongoDB).
 
 
 
--   : Ignores sensitive files like  and . Updated to include .
--   : The main FastAPI backend. Contains API routes, now with CORS whitelist, rate limiting, JWT auth, server-side Razorpay verification, and Pydantic validation.
--   : Defines Pydantic models for request/response validation. *Created* to separate models from , and updated  to  for Pydantic v2 compatibility.
--   : Server-side blockchain logic.
--   : Cryptographic utilities. Updated for PBKDF2/Argon2 key derivation and AES-GCM.
--   : Frontend API client. Updated to include JWT headers and use the correct backend URL.
--   : *Created* to manage JWT authentication (login, register, logout, token refresh, secure storage).
--   : Defines the root navigation and integrates  and . Modified to conditionally render auth screens or the main app content based on authentication status.
--   : The main entry point. Simplified as auth logic moved to .
--   : Settings screen. Updated to include a dark mode toggle and use .
--   , , , : Individual app sections. Currently being updated to consume  for dark mode consistency.
--   , : *Created* for JWT-based user authentication.
--   : Dashboard UI. Updated to fetch data from the authenticated backend and handle themes.
--   : *Created* to provide authentication state and functions (, , ) across the app.
--   : *Created* to manage light/dark theme state and persistence via AsyncStorage.
--   : Frontend environment variables.  was modified to point to the correct external URL.
+-   : The main FastAPI backend. Expanded with AI analysis and monthly report endpoints, integrated , and backend logic for premium features.  inconsistency fixed.
+-   : Defines Pydantic models.
+-   : Cryptographic utilities.
+-   : Frontend API client.
+-   : Manages JWT authentication. Logout function was reviewed, ensuring token and user data clearance.
+-   : **Newly created**. Contains regex-based parsing logic for Indian bank/UPI SMS formats, including categorization. Improved to 75% accuracy and further enhancements are planned.
+-   : **Newly created**. Handles Android-specific background SMS listening, permissions management, and integration with  for automatic transaction creation.
+-   : Root navigation. Modified to conditionally render auth screens and handle theme. Authentication flow reviewed.
+-   : Main entry point.
+-   : **Heavily modified**. Now includes Profile Management (edit name, email, password, picture), Notification settings, SMS permissions management, Data export/erase, a Premium Features section (upgrade button, status, AI analysis, monthly report links), and integrated theme toggle. Handlers for these functionalities have been added, and duplicate styles removed. This file is currently being made fully functional.
+-   : **Modified**. Integrated with  to display auto-detected transactions.
+-   , : Confirmed to have proper dark mode integration.
+-   : Provides authentication state and functions. Reviewed for logout functionality.
+-   : Manages light/dark theme state. Fixed to show a loading screen and import ,  to resolve blank screen issues.
+-   : Frontend environment variables.  points to the correct external URL.
+-   : **Updated**. Reflects new premium features, AI integration, and dependencies.
+-   : **Newly created**. For UI/UX polish (animations).
+-   : **Newly created**. Documents app store assets and launch summary.
+-   : **Newly created**. Script for testing SMS parsing accuracy.
 </code_architecture>
 
 <pending_tasks>
-- Full biometric integration.
-- IPFS sync implementation for multi-device (premium feature).
-- OCR Receipt Scan (client-side Tesseract.js).
-- SMS Parsing (Android only).
-- Further refining Razorpay integration for edge cases like idempotency.
-- Advanced analytics dashboard.
+-   Complete implementation of missing functionalities in the Settings screen (Detection statistics, Export Data, Erase Data, Two-Factor Authentication, Privacy Policy, Help & Support).
+-   Improve SMS parsing accuracy to 90%+ by adding more regex patterns and testing variations.
+-   UI/UX Polish: Clearly show auto-detected vs. manually-added transactions, ensure budget charts auto-update smoothly, add animations for transaction notifications.
+-   App Stability: Run continuous SMS testing, check background service for Android battery optimization.
+-   Compliance & Permissions: Add privacy disclaimer, use Play Store-compliant SMS permission request flow.
+-   Monetization Setup: Decide on free + ads OR free + Pro plan; add basic free tier + banner ad option for launch.
+-   App Store Packaging: Build signed APK/AAB for Android, prepare Play Store assets (logo, screenshots, descriptions).
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing user feedback regarding the newly implemented mandatory login and light/dark mode features. The user reported that:
-1.  The dark mode was not consistently applying to all main sections of the app (specifically transactions, bills, budgets, and analytics screens).
-2.  The logout functionality, while present, was not correctly redirecting to the login page after a user logged out.
+Immediately before this summary request, the AI engineer was working on fully implementing all missing functionalities within the  file. The user explicitly requested to ensure that Detection statistics and export data erase data two factor authentication upgrade to premium and data export privacy policy and help and support and upgraded option are working.
 
-To resolve these issues, the AI engineer first updated the main app layout () to properly structure the authentication flow, ensuring only the login page is visible when unauthenticated. Following this, the  was simplified. A logout button was added to . The current task involves systematically updating each of the mentioned screens (, , , ) to correctly consume the  and apply the chosen dark mode styles. The AI has already updated  and  and is in the process of updating  and .
+The AI engineer has begun this task by updating the  file in multiple steps. This involves adding the necessary logic and UI components to handle these features. The last action (Chat Message 257) was specifically focused on updating the Security section within the Settings to include the new functional handlers, indicating progress on features like Two-Factor Authentication. This work builds upon the previously added basic structure for Profile Management, Theme Selection, SMS Permissions, and the Premium Features section, aiming to make all these sub-sections fully interactive and functional.
 </current_work>
 
 <optional_next_step>
-Complete updating  and  to support dark mode, then test the complete authentication flow and dark mode functionality across all sections.
+Complete the implementation of the remaining functional elements within the  file.
 </optional_next_step>

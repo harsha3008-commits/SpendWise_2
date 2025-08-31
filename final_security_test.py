@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
 # Configuration
-BASE_URL = "https://fintrack-app-20.preview.emergentagent.com/api"
+BASE_URL = "https://privacyfin.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 class FinalSecurityTester:
@@ -367,7 +367,7 @@ class FinalSecurityTester:
         
         # Test preflight request
         cors_headers = {
-            "Origin": "https://fintrack-app-20.preview.emergentagent.com",
+            "Origin": "https://privacyfin.preview.emergentagent.com",
             "Access-Control-Request-Method": "POST",
             "Access-Control-Request-Headers": "Content-Type,Authorization"
         }

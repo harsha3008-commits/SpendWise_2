@@ -12,7 +12,7 @@ import Constants from 'expo-constants';
 // Get backend URL from environment
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl || 
                    process.env.EXPO_PUBLIC_BACKEND_URL || 
-                   'https://fintrack-app-20.preview.emergentagent.com';
+                   'https://privacyfin.preview.emergentagent.com';
 
 const API_BASE_URL = `${BACKEND_URL}/api`;
 
