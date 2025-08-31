@@ -1040,7 +1040,7 @@ async def upgrade_to_premium(
 ):
     """Upgrade user to premium subscription"""
     try:
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
         
         # TODO: Implement actual premium upgrade logic
         # This could integrate with payment processing
