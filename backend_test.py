@@ -384,7 +384,7 @@ class SpendWiseAPITester:
             "isDefault": False
         }
         
-        success, data, status_code = self.make_request("POST", "/categories", category_data)
+        success, data, status_code = self.make_request("POST", "/categories", category_data, use_auth=True)
         
         if success and isinstance(data, dict) and "id" in data:
             category_id = data["id"]
@@ -397,7 +397,7 @@ class SpendWiseAPITester:
 
     def test_get_categories(self):
         """Test getting all categories"""
-        success, data, status_code = self.make_request("GET", "/categories")
+        success, data, status_code = self.make_request("GET", "/categories", use_auth=True)
         
         if success and isinstance(data, list):
             self.log_test("Get Categories", True, f"Retrieved {len(data)} categories")
@@ -417,7 +417,7 @@ class SpendWiseAPITester:
             "isRecurring": False
         }
         
-        success, data, status_code = self.make_request("POST", "/transactions", transaction_data)
+        success, data, status_code = self.make_request("POST", "/transactions", transaction_data, use_auth=True)
         
         if success and isinstance(data, dict) and "id" in data:
             transaction_id = data["id"]
