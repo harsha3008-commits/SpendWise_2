@@ -27,30 +27,30 @@ export interface SmsPattern {
 
 // Comprehensive SMS patterns for Indian banks and UPI services
 const SMS_PATTERNS: SmsPattern[] = [
-  // State Bank of India (SBI)
+  // State Bank of India (SBI) - Multiple variations
   {
     bank: 'SBI',
-    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(debited|credited|deducted|received).*?(?:to|from|at)\s*([A-Za-z0-9\s]+).*?(?:Ref|RefNo|Txn):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\s+at\s+|\.|\s+Ref)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3,
     refGroup: 4
   },
   
-  // HDFC Bank
+  // HDFC Bank - Enhanced patterns
   {
     bank: 'HDFC',
-    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at)\s*([A-Za-z0-9\s]+).*?(?:Ref|RefNo|UPI Ref):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|UPI|Ref)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3,
     refGroup: 4
   },
   
-  // ICICI Bank
+  // ICICI Bank - Multiple formats
   {
     bank: 'ICICI',
-    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|spent|received).*?(?:to|from|at)\s*([A-Za-z0-9\s]+).*?(?:Ref|RefNo|TxnId):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|spent|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|TxnId|Ref)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3,
@@ -60,7 +60,7 @@ const SMS_PATTERNS: SmsPattern[] = [
   // Axis Bank
   {
     bank: 'AXIS',
-    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at)\s*([A-Za-z0-9\s]+).*?(?:Ref|RefNo|TID):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|TID|Ref)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3,
@@ -70,57 +70,167 @@ const SMS_PATTERNS: SmsPattern[] = [
   // Kotak Mahindra Bank
   {
     bank: 'KOTAK',
-    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|spent|received).*?(?:to|from|at)\s*([A-Za-z0-9\s]+).*?(?:Ref|RefNo|TxnRef):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|spent|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|TxnRef|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 2,
+    merchantGroup: 3,
+    refGroup: 4
+  },
+
+  // Punjab National Bank (PNB)
+  {
+    bank: 'PNB',
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|Ref|TXN)/i,
+    amountGroup: 1,
+    typeGroup: 2,
+    merchantGroup: 3,
+    refGroup: 4
+  },
+
+  // Bank of Baroda (BOB)
+  {
+    bank: 'BOB',
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 2,
+    merchantGroup: 3,
+    refGroup: 4
+  },
+
+  // YES Bank
+  {
+    bank: 'YES',
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|Ref|TXN)/i,
+    amountGroup: 1,
+    typeGroup: 2,
+    merchantGroup: 3,
+    refGroup: 4
+  },
+
+  // IDFC First Bank
+  {
+    bank: 'IDFC',
+    pattern: /(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:has been\s*)?(debited|credited|deducted|received).*?(?:to|from|at|by)\s*([A-Za-z0-9\s@]+?)(?:\s+on\s+|\.|Ref)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3,
     refGroup: 4
   },
   
-  // PhonePe
+  // PhonePe - Enhanced patterns
   {
     bank: 'PhonePe',
-    pattern: /(?:You\s*(?:paid|sent|received))\s*(?:Rs\.?|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:to|from)\s*([A-Za-z0-9\s@]+).*?(?:UPI\s*ID|UTR|Ref):\s*([A-Z0-9]+)/i,
+    pattern: /(?:You\s*(?:paid|sent|received))\s*(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:to|from)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\s+using|\.|UPI)/i,
     amountGroup: 1,
     typeGroup: 0, // Will be determined by context
     merchantGroup: 2,
     refGroup: 3
   },
   
-  // Google Pay (GPay)
+  // Google Pay (GPay) - Enhanced patterns
   {
     bank: 'GPay',
-    pattern: /(?:You\s*(?:paid|sent|received))\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:to|from)\s*([A-Za-z0-9\s@]+).*?(?:UPI\s*transaction\s*ID|Ref):\s*([A-Z0-9]+)/i,
+    pattern: /(?:You\s*(?:paid|sent|received))\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:to|from)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\s+using|\.|UPI)/i,
     amountGroup: 1,
     typeGroup: 0, // Will be determined by context
     merchantGroup: 2,
     refGroup: 3
   },
   
-  // Paytm
+  // Paytm - Enhanced patterns
   {
     bank: 'Paytm',
-    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited)\s*(?:to|from)\s*([A-Za-z0-9\s@]+).*?(?:Order|Txn|Ref)\s*(?:ID|No):\s*([A-Z0-9]+)/i,
+    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited)\s*(?:to|from|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|Order|Txn)/i,
     amountGroup: 1,
     typeGroup: 0, // Will be determined by context
     merchantGroup: 2,
     refGroup: 3
   },
-  
-  // BHIM UPI
+
+  // Amazon Pay
   {
-    bank: 'BHIM',
-    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received)\s*(?:to|from)\s*([A-Za-z0-9\s@]+).*?(?:UPI\s*Ref|Ref):\s*([A-Z0-9]+)/i,
+    bank: 'AMAZON',
+    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|debited|credited|charged)\s*(?:to|from|via|for)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|Order|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+
+  // Mobikwik
+  {
+    bank: 'MOBIKW',
+    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited)\s*(?:to|from|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|Txn)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+
+  // Freecharge
+  {
+    bank: 'FREECH',
+    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited)\s*(?:to|from|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|Order)/i,
     amountGroup: 1,
     typeGroup: 0,
     merchantGroup: 2,
     refGroup: 3
   },
   
-  // Generic Bank Pattern (Fallback)
+  // BHIM UPI - Enhanced
+  {
+    bank: 'BHIM',
+    pattern: /(?:Rs\.?|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited)\s*(?:to|from)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|UPI\s*Ref)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+
+  // UPI Generic Pattern (catches most UPI transactions)
+  {
+    bank: 'UPI',
+    pattern: /(?:Rs\.?|₹|INR)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:paid|sent|received|debited|credited|transferred)\s*(?:to|from|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+via|\.|UPI|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+  
+  // Alternative wordings - "debited by", "credited by"
+  {
+    bank: 'ALT_BY',
+    pattern: /(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:debited|credited|deducted|received)\s*(?:by|from)\s*([A-Za-z0-9\s@._-]+?)(?:\s+on|\s+at|\.|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+
+  // Card transactions
+  {
+    bank: 'CARD',
+    pattern: /(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:spent|charged|debited)\s*(?:at|on|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+using|\s+on|\.|Card)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+
+  // ATM transactions
+  {
+    bank: 'ATM',
+    pattern: /(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:withdrawn|debited)\s*(?:from|at)\s*([A-Za-z0-9\s._-]+?)(?:\s+ATM|\s+on|\.|Ref)/i,
+    amountGroup: 1,
+    typeGroup: 0,
+    merchantGroup: 2,
+    refGroup: 3
+  },
+  
+  // Generic Bank Pattern (Enhanced Fallback)
   {
     bank: 'Generic',
-    pattern: /(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(debited|credited|deducted|received|paid|sent).*?(?:to|from|at)\s*([A-Za-z0-9\s]+)/i,
+    pattern: /(?:Rs\.?|INR|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(debited|credited|deducted|received|paid|sent|spent|charged|withdrawn).*?(?:to|from|at|by|via)\s*([A-Za-z0-9\s@._-]+?)(?:\s+on|\s+at|\s+via|\.|Ref|UPI|Txn)/i,
     amountGroup: 1,
     typeGroup: 2,
     merchantGroup: 3
