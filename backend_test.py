@@ -50,18 +50,24 @@ class SpendWiseAPITester:
             print(f"   Response: {response_data}")
         print()
 
-    def make_request(self, method: str, endpoint: str, data: Dict = None) -> tuple:
+    def make_request(self, method: str, endpoint: str, data: Dict = None, use_auth: bool = False) -> tuple:
         """Make HTTP request and return (success, response_data, status_code)"""
         url = f"{self.base_url}{endpoint}"
+        headers = self.headers.copy()
+        
+        # Add authentication header if requested and token is available
+        if use_auth and self.auth_token:
+            headers["Authorization"] = f"Bearer {self.auth_token}"
+        
         try:
             if method.upper() == "GET":
-                response = requests.get(url, headers=self.headers, timeout=10)
+                response = requests.get(url, headers=headers, timeout=10)
             elif method.upper() == "POST":
-                response = requests.post(url, headers=self.headers, json=data, timeout=10)
+                response = requests.post(url, headers=headers, json=data, timeout=10)
             elif method.upper() == "PUT":
-                response = requests.put(url, headers=self.headers, json=data, timeout=10)
+                response = requests.put(url, headers=headers, json=data, timeout=10)
             elif method.upper() == "DELETE":
-                response = requests.delete(url, headers=self.headers, timeout=10)
+                response = requests.delete(url, headers=headers, timeout=10)
             else:
                 return False, f"Unsupported method: {method}", 400
             
