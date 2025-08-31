@@ -492,22 +492,32 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
 
   const performDataErase = async () => {
     try {
-      // Clear all AsyncStorage data
-      await AsyncStorage.clear();
-      
-      // Reset SMS service
-      await smsService.disable();
-      
-      // TODO: Call backend API to delete user data
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('Error', 'Please login again');
+        return;
+      }
+
+      // Call backend API to erase user data
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/erase-data`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
       if (response.ok) {
+        // Clear all local AsyncStorage data
+        await AsyncStorage.clear();
+        
+        // Reset SMS service
+        try {
+          await smsService.disable();
+        } catch (smsError) {
+          console.warn('SMS service disable error:', smsError);
+        }
+        
         Alert.alert(
           '✅ Data Erased Successfully',
           'All your financial data has been permanently deleted. The app will now restart with a clean state.',
@@ -515,14 +525,19 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
             { 
               text: 'Restart App', 
               onPress: () => {
-                // Force app restart or logout
+                // Force app logout
                 logout();
               }
             }
           ]
         );
       } else {
-        throw new Error('Failed to erase server data');
+        const errorData = await response.json();
+        Alert.alert(
+          '⚠️ Error',
+          errorData.detail || 'Failed to erase server data. Please contact support if needed.',
+          [{ text: 'OK' }]
+        );
       }
     } catch (error) {
       console.error('Data erase error:', error);
