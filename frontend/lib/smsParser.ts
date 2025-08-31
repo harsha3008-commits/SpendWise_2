@@ -441,9 +441,10 @@ function categorizeTransaction(merchant: string, smsBody: string): string {
 }
 
 /**
- * Test cases for SMS parsing
+ * Comprehensive test cases for SMS parsing - targeting 90%+ accuracy
  */
 export const TEST_SMS_SAMPLES = [
+  // Traditional Bank Formats
   {
     bank: 'SBI',
     sms: 'Dear Customer, Rs.500.00 debited from A/C **1234 on 31-Aug-24 to Amazon Pay India at 14:30. Ref: 123456789. SMS HELP to 567676.',
@@ -455,19 +456,118 @@ export const TEST_SMS_SAMPLES = [
     expected: { amount: 1200, type: 'debit', merchant: 'SWIGGY', category: 'Food' }
   },
   {
+    bank: 'ICICI',
+    sms: 'INR 2000.00 credited to A/C **9876 on 31-Aug-24 from SALARY CREDIT. TxnId: 987654321. Available balance: INR 15000.',
+    expected: { amount: 2000, type: 'credit', merchant: 'SALARY CREDIT', category: 'Other' }
+  },
+  {
+    bank: 'AXIS',
+    sms: 'Rs.750.00 debited by UBER INDIA from your A/C **2345 on 31-Aug-24. TID: AXI123456789. Available Bal: Rs.12500.',
+    expected: { amount: 750, type: 'debit', merchant: 'UBER INDIA', category: 'Transport' }
+  },
+  {
+    bank: 'KOTAK',
+    sms: 'Rs.300.00 has been spent at STARBUCKS on 31-Aug-24 using your Kotak Card **9876. TxnRef: KOT987654.',
+    expected: { amount: 300, type: 'debit', merchant: 'STARBUCKS', category: 'Food' }
+  },
+
+  // UPI Service Formats
+  {
     bank: 'PhonePe',
     sms: 'You paid Rs.350 to Uber India via UPI. UPI transaction ID: 424242424242. Thank you for using PhonePe!',
     expected: { amount: 350, type: 'debit', merchant: 'Uber India', category: 'Transport' }
   },
   {
     bank: 'GPay',
-    sms: 'You sent ₹800 to john@paytm via Google Pay. UPI transaction ID: 123456789012. Keep your transactions secure.',
-    expected: { amount: 800, type: 'debit', merchant: 'john@paytm', category: 'Other' }
+    sms: 'You sent ₹800 to john.doe@paytm via Google Pay. UPI transaction ID: 123456789012. Keep your transactions secure.',
+    expected: { amount: 800, type: 'debit', merchant: 'john doe paytm', category: 'Other' }
   },
   {
+    bank: 'Paytm',
+    sms: 'Rs.450 paid to DOMINOS PIZZA via Paytm UPI. Order ID: PTM789456123. Thank you for using Paytm.',
+    expected: { amount: 450, type: 'debit', merchant: 'DOMINOS PIZZA', category: 'Food' }
+  },
+
+  // Alternative Wordings
+  {
+    bank: 'PNB',
+    sms: 'Rs.2500.00 debited by FLIPKART from your PNB A/C **1111 on 31-Aug-24. TXN: PNB654321098.',
+    expected: { amount: 2500, type: 'debit', merchant: 'FLIPKART', category: 'Shopping' }
+  },
+  {
+    bank: 'YES',
+    sms: 'INR 150.00 charged at McDONALDS using YES Bank Card **8888 on 31-Aug-24. Ref: YES147258369.',
+    expected: { amount: 150, type: 'debit', merchant: 'McDONALDS', category: 'Food' }
+  },
+
+  // Card Transactions
+  {
+    bank: 'HDFC',
+    sms: 'Rs.850.00 spent on NETFLIX SUBSCRIPTION using HDFC Card **4567 on 31-Aug-24. Ref: HDC852741963.',
+    expected: { amount: 850, type: 'debit', merchant: 'NETFLIX SUBSCRIPTION', category: 'Entertainment' }
+  },
+
+  // ATM Transactions  
+  {
+    bank: 'SBI',
+    sms: 'Rs.5000.00 withdrawn from SBI ATM on 31-Aug-24. A/C **1234. Location: CONNAUGHT PLACE. Ref: ATM963852741.',
+    expected: { amount: 5000, type: 'debit', merchant: 'SBI ATM', category: 'Cash' }
+  },
+
+  // Bill Payments
+  {
     bank: 'ICICI',
-    sms: 'INR 2000.00 credited to A/C **9876 on 31-Aug-24 from SALARY CREDIT. TxnId: 987654321. Available balance: INR 15000.',
-    expected: { amount: 2000, type: 'credit', merchant: 'SALARY CREDIT', category: 'Other' }
+    sms: 'Rs.1800.00 debited for ELECTRICITY BILL via ICICI iMobile on 31-Aug-24. Ref: PWR456789123.',
+    expected: { amount: 1800, type: 'debit', merchant: 'ELECTRICITY BILL', category: 'Bills' }
+  },
+
+  // Refunds
+  {
+    bank: 'AXIS',
+    sms: 'Rs.200.00 credited to your A/C **5555 as REFUND FROM AMAZON on 31-Aug-24. TID: REF789654123.',
+    expected: { amount: 200, type: 'credit', merchant: 'REFUND FROM AMAZON', category: 'Shopping' }
+  },
+
+  // Money Transfer
+  {
+    bank: 'BHIM',
+    sms: '₹1500 received from raj.kumar@paytm via BHIM UPI on 31-Aug-24. UPI Ref: BHM147852369.',
+    expected: { amount: 1500, type: 'credit', merchant: 'raj kumar paytm', category: 'Other' }
+  },
+
+  // Investment
+  {
+    bank: 'ZERODHA',
+    sms: 'Rs.10000.00 debited from your A/C **7890 for MUTUAL FUND SIP on 31-Aug-24. Ref: MF159753486.',
+    expected: { amount: 10000, type: 'debit', merchant: 'MUTUAL FUND SIP', category: 'Investment' }
+  },
+
+  // Healthcare
+  {
+    bank: 'GPay',
+    sms: 'You paid ₹500 to APOLLO PHARMACY via Google Pay UPI. Transaction ID: AP987654321. Stay healthy!',
+    expected: { amount: 500, type: 'debit', merchant: 'APOLLO PHARMACY', category: 'Healthcare' }
+  },
+
+  // Travel
+  {
+    bank: 'PhonePe',
+    sms: 'You paid Rs.8500 to INDIGO AIRLINES via PhonePe UPI. Booking Ref: 6E123456. Have a safe journey!',
+    expected: { amount: 8500, type: 'debit', merchant: 'INDIGO AIRLINES', category: 'Travel' }
+  },
+
+  // Fuel
+  {
+    bank: 'HDFC',
+    sms: 'Rs.2000.00 debited from A/C **3456 at HP PETROL PUMP on 31-Aug-24. Card **9876. Ref: FUEL741852.',
+    expected: { amount: 2000, type: 'debit', merchant: 'HP PETROL PUMP', category: 'Transport' }
+  },
+
+  // Subscription
+  {
+    bank: 'ICICI',
+    sms: 'Rs.199.00 auto-debited for SPOTIFY PREMIUM on 31-Aug-24 from A/C **6789. Ref: SPT159357486.',
+    expected: { amount: 199, type: 'debit', merchant: 'SPOTIFY PREMIUM', category: 'Entertainment' }
   }
 ];
 
