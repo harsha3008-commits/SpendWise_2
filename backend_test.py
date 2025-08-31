@@ -197,8 +197,10 @@ class SpendWiseAPITester:
         # First create some test transactions for analysis
         self.create_sample_transactions_for_ai()
         
+        # Extract user_id from JWT token (in real implementation, this would be done server-side)
+        # For testing, we'll use a placeholder that the server should extract from JWT
         analysis_data = {
-            "user_id": "test-user-id",  # This should be extracted from JWT in real implementation
+            "user_id": "current_user",  # Server should extract this from JWT
             "analysis_type": "spending_patterns",
             "time_period": "current_month"
         }
@@ -222,7 +224,7 @@ class SpendWiseAPITester:
             return
         
         analysis_data = {
-            "user_id": "test-user-id",
+            "user_id": "current_user",  # Server should extract this from JWT
             "analysis_type": "budget_suggestions",
             "time_period": "current_month"
         }
