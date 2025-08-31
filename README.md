@@ -56,12 +56,14 @@ SpendWise is a cutting-edge mobile finance application that combines **privacy-f
 - Category breakdown pie charts
 - Net worth progression over time
 
-#### **Premium Features**
-- **AI-Powered Insights**: Spending pattern analysis and recommendations
-- **Recurring Detection**: Automatic identification of subscription patterns
-- **Cashflow Forecasting**: 3-month financial projections
-- **Advanced Charts**: Multi-dimensional data visualization
-- **Export Reports**: CSV/PDF export with detailed analytics
+#### **Premium Features** 🌟
+- **🤖 AI-Powered Insights**: Smart spending pattern analysis powered by advanced LLM
+- **💡 Intelligent Recommendations**: Personalized savings suggestions and budget optimization
+- **📊 Monthly PDF/CSV Reports**: Professional reports with AI insights and sharing options  
+- **🔔 Priority Notifications**: Enhanced notification system for important transactions
+- **📈 Advanced Analytics**: Multi-dimensional data visualization and trend analysis
+- **☁️ Multi-Device Sync**: Encrypted IPFS-based synchronization (coming soon)
+- **🚀 Early Access**: Beta features and priority support
 
 ### ⚙️ **Security & Privacy**
 - **Local Encryption**: AES-256 encryption with user-controlled keys
