@@ -58,10 +58,11 @@ export default function SettingsScreen() {
     prioritySupport: false,
   });
 
-  // Load SMS service state on component mount
+  // Load SMS service state and user profile on component mount
   useEffect(() => {
-    const loadSmsServiceState = async () => {
+    const loadInitialData = async () => {
       try {
+        // Load SMS service state
         const config = smsService.getConfig();
         const stats = await smsService.getStats();
         
@@ -71,13 +72,44 @@ export default function SettingsScreen() {
         }));
         
         setSmsStats(stats);
+
+        // Load user profile from backend
+        if (user?.id) {
+          try {
+            const token = await AsyncStorage.getItem('access_token');
+            if (token) {
+              const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/${user.id}`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              if (response.ok) {
+                const userProfile = await response.json();
+                setProfileData({
+                  name: userProfile.full_name || userProfile.email,
+                  email: userProfile.email,
+                });
+              }
+            }
+          } catch (profileError) {
+            console.warn('Failed to load user profile from backend:', profileError);
+            // Fallback to user data from auth context
+            setProfileData({
+              name: user?.full_name || user?.email || 'SpendWise User',
+              email: user?.email || '',
+            });
+          }
+        }
       } catch (error) {
-        console.error('Error loading SMS service state:', error);
+        console.error('Error loading initial data:', error);
       }
     };
 
-    loadSmsServiceState();
-  }, []);
+    loadInitialData();
+  }, [user]);
 
   const handleLogout = async () => {
     Alert.alert(
