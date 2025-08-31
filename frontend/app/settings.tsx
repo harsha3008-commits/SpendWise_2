@@ -657,22 +657,44 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
               <View style={styles.settingLeft}>
                 <Ionicons name="mail" size={20} color={theme.colors.primary} style={styles.settingIcon} />
                 <View>
-                  <Text style={styles.settingTitle}>SMS Access</Text>
+                  <Text style={styles.settingTitle}>SMS Auto-Detection</Text>
                   <Text style={styles.settingSubtitle}>
                     {Platform.OS === 'android' 
-                      ? (permissions.smsAccess ? 'Enabled - Auto-detect transactions' : 'Allow SMS transaction detection')
-                      : 'Not available on iOS'
+                      ? (permissions.smsAccess 
+                          ? `✅ Active - ${smsStats.autoDetected} transactions detected`
+                          : '📱 Detect transactions from bank SMS'
+                        )
+                      : 'Not available on iOS - Use manual entry'
                     }
                   </Text>
                 </View>
               </View>
               {Platform.OS === 'android' && (
-                <Ionicons 
-                  name={permissions.smsAccess ? "checkmark-circle" : "chevron-forward"} 
-                  size={20} 
-                  color={permissions.smsAccess ? theme.colors.success : theme.colors.textSecondary} 
+                <Switch
+                  value={permissions.smsAccess}
+                  onValueChange={handleSMSPermission}
+                  trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                  thumbColor={permissions.smsAccess ? '#FFFFFF' : '#F4F3F4'}
                 />
               )}
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem} onPress={handleViewSMSStats}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="analytics" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Detection Statistics</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {smsStats.autoDetected > 0 
+                      ? `${smsStats.autoDetected} auto-detected | ${smsStats.total} total`
+                      : 'View SMS parsing stats and test'
+                    }
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
