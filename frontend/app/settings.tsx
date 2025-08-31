@@ -903,9 +903,16 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
     );
   };
 
-  const updateNotificationSetting = (key: keyof typeof notifications, value: boolean) => {
-    setNotifications({ ...notifications, [key]: value });
-    // TODO: Save to AsyncStorage or API
+  const updateNotificationSetting = async (key: keyof typeof notifications, value: boolean) => {
+    const updatedNotifications = { ...notifications, [key]: value };
+    setNotifications(updatedNotifications);
+    
+    // Save to AsyncStorage
+    try {
+      await AsyncStorage.setItem('notification_settings', JSON.stringify(updatedNotifications));
+    } catch (error) {
+      console.error('Failed to save notification settings:', error);
+    }
   };
 
   const styles = createStyles(theme);
