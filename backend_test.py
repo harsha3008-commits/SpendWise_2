@@ -655,52 +655,101 @@ class SpendWiseAPITester:
             self.log_test("Error Handling - Invalid Transaction Data", False, f"Should have rejected invalid data, got {status_code}")
 
     def run_all_tests(self):
-        """Run the complete test suite"""
-        print("🚀 Starting SpendWise Backend API Test Suite")
-        print("=" * 60)
+        """Run the complete test suite including Premium Features"""
+        print("🚀 Starting SpendWise Premium Features Backend API Test Suite")
+        print("=" * 70)
         
-        # Basic health check
+        # Basic health check (no auth required)
         self.test_health_check()
+        
+        # ===== AUTHENTICATION FLOW TESTS =====
+        print("\n🔐 TESTING AUTHENTICATION SYSTEM")
+        print("-" * 50)
+        
+        # Test user registration
+        if not self.test_user_registration():
+            print("❌ Cannot continue tests without successful registration")
+            return
+        
+        # Test user login
+        self.test_user_login()
+        
+        # Test token refresh
+        self.test_token_refresh()
+        
+        # Test security features
+        self.test_invalid_token_rejection()
+        self.test_unauthorized_access_protection()
+        
+        # ===== PREMIUM FEATURES TESTS =====
+        print("\n💎 TESTING PREMIUM FEATURES")
+        print("-" * 50)
+        
+        # Test premium status management
+        self.test_premium_status_check()
+        self.test_premium_upgrade()
+        
+        # Test monthly report generation
+        self.test_monthly_report_generation()
+        
+        # ===== AI ANALYSIS TESTS =====
+        print("\n🤖 TESTING AI ANALYSIS ENDPOINTS")
+        print("-" * 50)
+        
+        # Test AI analysis features
+        self.test_ai_expense_analysis()
+        self.test_ai_budget_suggestions()
+        self.test_ai_quick_insights()
+        
+        # Test rate limiting on AI endpoints
+        self.test_rate_limiting_on_ai_endpoints()
+        
+        # ===== CORE FUNCTIONALITY TESTS (with authentication) =====
+        print("\n⚙️ TESTING CORE FUNCTIONALITY WITH AUTHENTICATION")
+        print("-" * 50)
         
         # Create test category first (needed for other tests)
         category_id = self.test_create_category()
         if not category_id:
-            print("❌ Cannot continue tests without a valid category")
-            return
-        
-        # Test category operations
-        self.test_get_categories()
-        
-        # Test transaction operations with blockchain verification
-        first_tx_id = self.test_create_transaction(category_id)
-        if first_tx_id:
-            # Get the first transaction to get its hash for chaining
-            transactions = self.test_get_transactions()
-            first_tx_hash = None
-            if transactions:
-                for tx in transactions:
-                    if tx["id"] == first_tx_id:
-                        first_tx_hash = tx["currentHash"]
-                        break
+            print("❌ Cannot continue transaction tests without a valid category")
+        else:
+            # Test category operations
+            self.test_get_categories()
             
-            if first_tx_hash:
-                # Create second transaction to test chaining
-                second_tx_id = self.test_create_second_transaction(category_id, first_tx_hash)
+            # Test transaction operations with blockchain verification
+            first_tx_id = self.test_create_transaction(category_id)
+            if first_tx_id:
+                # Get the first transaction to get its hash for chaining
+                transactions = self.test_get_transactions()
+                first_tx_hash = None
+                if transactions:
+                    for tx in transactions:
+                        if tx["id"] == first_tx_id:
+                            first_tx_hash = tx["currentHash"]
+                            break
+                
+                if first_tx_hash:
+                    # Create second transaction to test chaining
+                    second_tx_id = self.test_create_second_transaction(category_id, first_tx_hash)
+                
+                # Test other transaction operations
+                self.test_get_single_transaction(first_tx_id)
+                self.test_update_transaction(first_tx_id)
             
-            # Test other transaction operations
-            self.test_get_single_transaction(first_tx_id)
-            self.test_update_transaction(first_tx_id)
+            # Test ledger verification
+            self.test_ledger_verification()
+            
+            # Test budget operations
+            budget_id = self.test_create_budget(category_id)
+            self.test_get_budgets()
+            
+            # Test bill operations
+            bill_id = self.test_create_bill(category_id)
+            self.test_get_bills()
         
-        # Test ledger verification
-        self.test_ledger_verification()
-        
-        # Test budget operations
-        budget_id = self.test_create_budget(category_id)
-        self.test_get_budgets()
-        
-        # Test bill operations
-        bill_id = self.test_create_bill(category_id)
-        self.test_get_bills()
+        # ===== PAYMENT INTEGRATION TESTS =====
+        print("\n💳 TESTING PAYMENT INTEGRATION")
+        print("-" * 50)
         
         # Test payment operations
         payment_order = self.test_create_payment_order()
@@ -708,11 +757,15 @@ class SpendWiseAPITester:
         # Test analytics
         self.test_analytics_summary()
         
+        # ===== ERROR HANDLING TESTS =====
+        print("\n🚨 TESTING ERROR HANDLING")
+        print("-" * 50)
+        
         # Test error handling
         self.test_error_cases()
         
         # Clean up - delete created transaction
-        if first_tx_id:
+        if 'first_tx_id' in locals() and first_tx_id:
             self.test_delete_transaction(first_tx_id)
         
         # Print summary
