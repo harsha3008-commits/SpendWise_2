@@ -855,7 +855,7 @@ async def analyze_expenses(
     """Generate AI-powered expense analysis"""
     try:
         # Verify user owns the data
-        if analysis_request.user_id != current_user["user_id"]:
+        if analysis_request.user_id != current_user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
         
         # Fetch user transactions
