@@ -14,10 +14,17 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
+import { smsService } from '../lib/SmsService';
 
 interface Transaction {
   id: string;
   type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  description: string;
+  date: string;
+  isAutoDetected?: boolean;
+  smsReference?: string;
   amount: number;
   category: string;
   description: string;
