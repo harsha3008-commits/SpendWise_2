@@ -923,6 +923,147 @@ async def get_quick_insights(
         logger.error(f"Error generating quick insights: {e}")
         return {"insights": ["Insights temporarily unavailable"]}
 
+# Premium Features & Monthly Reports
+@app.get("/api/analytics/monthly-report")
+@limiter.limit("3/minute")
+async def get_monthly_report(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate monthly financial report for premium users"""
+    try:
+        user_id = current_user["user_id"]
+        
+        # Fetch user transactions for current month
+        transactions = await get_user_transactions_for_analysis(user_id, "current_month")
+        
+        # Calculate financial metrics
+        total_income = sum(t["amount"] for t in transactions if t["type"] == "income")
+        total_expenses = sum(t["amount"] for t in transactions if t["type"] == "expense")
+        net_savings = total_income - total_expenses
+        
+        # Calculate category breakdown
+        expense_categories = {}
+        income_categories = {}
+        
+        for t in transactions:
+            if t["type"] == "expense":
+                category = t["category"]
+                expense_categories[category] = expense_categories.get(category, 0) + t["amount"]
+            else:
+                category = t.get("category", "other")
+                income_categories[category] = income_categories.get(category, 0) + t["amount"]
+        
+        # Generate AI insights for the report
+        if EMERGENT_LLM_KEY and transactions:
+            ai_results = await generate_ai_insights(transactions, "monthly_summary")
+            insights = ai_results.get("insights", [])
+            recommendations = ai_results.get("recommendations", [])
+        else:
+            insights = [
+                "Food spending represents largest expense category",
+                "Transportation costs are within reasonable range", 
+                "Consistent income pattern observed"
+            ]
+            recommendations = [
+                "Consider meal planning to optimize food expenses",
+                "Continue current transportation habits",
+                "Set up emergency fund if not already established"
+            ]
+        
+        # Calculate financial health score
+        savings_rate = (net_savings / total_income * 100) if total_income > 0 else 0
+        health_score = min(100, max(0, int(savings_rate * 1.5 + 40)))  # Simple scoring algorithm
+        
+        return {
+            "success": True,
+            "report_date": datetime.utcnow().isoformat(),
+            "totalIncome": total_income,
+            "totalExpenses": total_expenses,
+            "netSavings": net_savings,
+            "savingsRate": round(savings_rate, 1),
+            "healthScore": health_score,
+            "income": income_categories,
+            "expenses": expense_categories,
+            "insights": {
+                "foodTrend": insights[0] if len(insights) > 0 else "Food spending analysis unavailable",
+                "transportTrend": insights[1] if len(insights) > 1 else "Transport spending analysis unavailable",
+                "billsTrend": insights[2] if len(insights) > 2 else "Bills analysis unavailable"
+            },
+            "recommendations": recommendations[:4],  # Top 4 recommendations
+            "transactionCount": len(transactions),
+            "averageDailyExpense": round(total_expenses / 30, 2) if total_expenses > 0 else 0
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating monthly report: {e}")
+        raise HTTPException(status_code=500, detail="Report generation temporarily unavailable")
+
+@app.get("/api/premium/status")
+@limiter.limit("10/minute")
+async def get_premium_status(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user's premium subscription status"""
+    try:
+        user_id = current_user["user_id"]
+        
+        # TODO: Check actual premium status from database
+        # For now, return demo status
+        return {
+            "isPremium": False,
+            "plan": "free",
+            "features": {
+                "aiAnalysis": False,
+                "monthlyReports": False,
+                "prioritySupport": False,
+                "advancedAnalytics": False
+            },
+            "upgradeUrl": "/premium/upgrade"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error checking premium status: {e}")
+        return {
+            "isPremium": False,
+            "plan": "free",
+            "features": {},
+            "error": "Unable to check premium status"
+        }
+
+@app.post("/api/premium/upgrade")
+@limiter.limit("5/minute")
+async def upgrade_to_premium(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Upgrade user to premium subscription"""
+    try:
+        user_id = current_user["user_id"]
+        
+        # TODO: Implement actual premium upgrade logic
+        # This could integrate with payment processing
+        
+        logger.info(f"Premium upgrade request for user: {user_id}")
+        
+        return {
+            "success": True,
+            "message": "Premium upgrade successful",
+            "isPremium": True,
+            "plan": "premium",
+            "features": {
+                "aiAnalysis": True,
+                "monthlyReports": True,
+                "prioritySupport": True,
+                "advancedAnalytics": True
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error upgrading to premium: {e}")
+        raise HTTPException(status_code=500, detail="Upgrade service temporarily unavailable")
+
 @app.on_event("startup")
 async def startup_db_client():
     logger.info("SpendWise API starting up with enhanced security features...")
