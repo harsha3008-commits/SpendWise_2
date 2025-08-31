@@ -139,6 +139,10 @@ class UserLogin(BaseModel):
     email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
     password: str = Field(..., min_length=8)
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, max_length=100)
+    email: Optional[str] = Field(None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
+
 class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     type: str = Field(..., pattern=r'^(expense|income|transfer|bill)$')
