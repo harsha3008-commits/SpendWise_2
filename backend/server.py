@@ -1007,7 +1007,7 @@ async def get_premium_status(
 ):
     """Get user's premium subscription status"""
     try:
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
         
         # TODO: Check actual premium status from database
         # For now, return demo status
