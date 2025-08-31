@@ -432,6 +432,189 @@ async def refresh_token(request: Request, credentials: HTTPAuthorizationCredenti
         expires_in=int(JWT_EXPIRATION_DELTA.total_seconds())
     )
 
+# User Management Endpoints
+@api_router.get("/users/{user_id}")
+@limiter.limit("30/minute")
+async def get_user_profile(
+    request: Request,
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user profile information"""
+    # Ensure user can only access their own profile
+    if user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    try:
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Return safe user data (exclude sensitive fields)
+        return {
+            "id": user["id"],
+            "email": user["email"],
+            "full_name": user.get("full_name", ""),
+            "created_at": user["created_at"],
+            "last_login": user.get("last_login"),
+            "is_active": user.get("is_active", True),
+            "profile_picture": user.get("profile_picture")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user profile: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch user profile")
+
+@api_router.put("/users/{user_id}")
+@limiter.limit("10/minute")
+async def update_user_profile(
+    request: Request,
+    user_id: str,
+    user_update: UserUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update user profile information"""
+    # Ensure user can only update their own profile
+    if user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    try:
+        # Prepare update data
+        update_data = {}
+        if user_update.full_name is not None:
+            update_data["full_name"] = user_update.full_name.strip()
+        if user_update.email is not None:
+            # Check if email is already taken by another user
+            existing_user = await db.users.find_one({"email": user_update.email, "id": {"$ne": user_id}})
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Email already taken")
+            update_data["email"] = user_update.email
+        
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No valid update data provided")
+        
+        update_data["updated_at"] = datetime.utcnow()
+        
+        # Update user in database
+        result = await db.users.update_one(
+            {"id": user_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Return updated user data
+        updated_user = await db.users.find_one({"id": user_id})
+        return {
+            "id": updated_user["id"],
+            "email": updated_user["email"],
+            "full_name": updated_user.get("full_name", ""),
+            "updated_at": updated_user["updated_at"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating user profile: {e}")
+        raise HTTPException(status_code=500, detail="Unable to update user profile")
+
+@api_router.put("/users/{user_id}/password")
+@limiter.limit("5/minute")
+async def change_user_password(
+    request: Request,
+    user_id: str,
+    password_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Change user password"""
+    # Ensure user can only change their own password
+    if user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    try:
+        current_password = password_data.get("current_password")
+        new_password = password_data.get("new_password")
+        
+        if not current_password or not new_password:
+            raise HTTPException(status_code=400, detail="Current password and new password are required")
+        
+        # Validate new password strength
+        if len(new_password) < 8:
+            raise HTTPException(status_code=400, detail="New password must be at least 8 characters long")
+        
+        # Get current user from database
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Verify current password
+        if not verify_password(current_password, user["password_hash"]):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        
+        # Hash new password
+        new_password_hash = hash_password(new_password)
+        
+        # Update password in database
+        result = await db.users.update_one(
+            {"id": user_id},
+            {"$set": {
+                "password_hash": new_password_hash,
+                "password_changed_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "success": True,
+            "message": "Password changed successfully"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error changing password: {e}")
+        raise HTTPException(status_code=500, detail="Unable to change password")
+
+@api_router.delete("/users/erase-data")
+@limiter.limit("2/minute")
+async def erase_user_data(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Permanently erase all user data"""
+    try:
+        user_id = current_user["id"]
+        
+        # Delete all user data from various collections
+        await asyncio.gather(
+            db.transactions.delete_many({"user_id": user_id}),
+            db.budgets.delete_many({"user_id": user_id}),
+            db.bills.delete_many({"user_id": user_id}),
+            db.categories.delete_many({"user_id": user_id}),
+            db.payment_orders.delete_many({"user_id": user_id}),
+            db.subscriptions.delete_many({"user_id": user_id}),
+            db.idempotent_requests.delete_many({"user_id": user_id})
+        )
+        
+        # Finally, delete user account
+        await db.users.delete_one({"id": user_id})
+        
+        logger.info(f"All data erased for user: {user_id}")
+        
+        return {
+            "success": True,
+            "message": "All user data has been permanently erased"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error erasing user data: {e}")
+        raise HTTPException(status_code=500, detail="Unable to erase user data")
+
 # Enhanced Transaction routes with authentication and rate limiting
 @api_router.get("/transactions", response_model=List[Transaction])
 @limiter.limit("100/minute")
