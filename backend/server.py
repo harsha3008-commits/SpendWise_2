@@ -932,7 +932,7 @@ async def get_monthly_report(
 ):
     """Generate monthly financial report for premium users"""
     try:
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
         
         # Fetch user transactions for current month
         transactions = await get_user_transactions_for_analysis(user_id, "current_month")
