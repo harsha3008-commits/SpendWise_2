@@ -135,22 +135,55 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleUpgradeToPremium = () => {
-    Alert.alert(
-      '🌟 Upgrade to Premium',
-      'Unlock advanced features:\n\n🤖 AI Expense Analysis\n📊 Monthly PDF/CSV Reports\n📈 Advanced Analytics\n🔔 Priority Notifications\n\nPrice: ₹499/month',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Upgrade Now', 
-          onPress: () => {
-            // TODO: Integrate with actual payment system
-            setIsPremium(true);
-            Alert.alert('Success!', 'Welcome to SpendWise Premium! 🎉');
+  const handleUpgradeToPremium = async () => {
+    try {
+      Alert.alert(
+        '🌟 Upgrade to Premium',
+        'Unlock advanced features:\n\n🤖 AI Expense Analysis\n📊 Monthly PDF/CSV Reports\n📈 Advanced Analytics\n🔔 Priority Notifications\n\nPrice: ₹499/month',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Upgrade Now', 
+            onPress: async () => {
+              try {
+                const token = await AsyncStorage.getItem('access_token');
+                if (!token) {
+                  Alert.alert('Error', 'Please login again');
+                  return;
+                }
+
+                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/premium/upgrade`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                });
+
+                if (response.ok) {
+                  const upgradeData = await response.json();
+                  setIsPremium(true);
+                  setPremiumFeatures({
+                    aiAnalysis: true,
+                    monthlyReports: true,
+                    prioritySupport: true,
+                  });
+                  Alert.alert('Success!', 'Welcome to SpendWise Premium! 🎉');
+                } else {
+                  Alert.alert('Error', 'Failed to upgrade to premium. Please try again.');
+                }
+              } catch (error) {
+                console.error('Premium upgrade error:', error);
+                Alert.alert('Error', 'Failed to upgrade to premium. Please try again.');
+              }
+            }
           }
-        }
-      ]
-    );
+        ]
+      );
+    } catch (error) {
+      console.error('Premium upgrade error:', error);
+      Alert.alert('Error', 'Failed to upgrade to premium. Please try again.');
+    }
   };
 
   const handleAIAnalysis = async () => {
