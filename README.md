@@ -103,6 +103,8 @@ SpendWise is a cutting-edge mobile finance application that combines **privacy-f
 - **Razorpay SDK**: Payment processing integration
 - **Web3.py**: Blockchain interaction utilities
 - **JWT Authentication**: Secure user session management
+- **🤖 Emergent LLM Integration**: AI-powered expense analysis with gpt-4o-mini
+- **📊 Report Generation**: PDF/CSV export with file sharing capabilities
 
 ### 🔐 **Security & Crypto**
 - **CryptoJS**: Client-side encryption (AES-256, SHA-256)
