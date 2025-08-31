@@ -129,9 +129,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setTheme,
   };
 
-  // Don't render children until theme is loaded
+  // Show loading screen while theme is being loaded
   if (isLoading) {
-    return null;
+    return (
+      <View style={{ flex: 1, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 18, color: '#007AFF', fontWeight: '600' }}>SpendWise</Text>
+        <Text style={{ fontSize: 14, color: '#666666', marginTop: 8 }}>Loading...</Text>
+      </View>
+    );
   }
 
   return (
