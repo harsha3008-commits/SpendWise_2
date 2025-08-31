@@ -73,6 +73,16 @@ export default function SettingsScreen() {
         
         setSmsStats(stats);
 
+        // Load saved notification settings
+        try {
+          const savedNotifications = await AsyncStorage.getItem('notification_settings');
+          if (savedNotifications) {
+            setNotifications(JSON.parse(savedNotifications));
+          }
+        } catch (error) {
+          console.warn('Failed to load notification settings:', error);
+        }
+
         // Load user profile and premium status from backend
         if (user?.id) {
           try {
