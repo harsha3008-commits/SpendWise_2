@@ -1205,7 +1205,7 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
           <Text style={styles.sectionTitle}>Premium Features</Text>
           
           <View style={styles.settingsCard}>
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleUpgradeToPremiumDetailed}>
               <View style={styles.settingLeft}>
                 <Ionicons name="star" size={20} color={theme.colors.warning} style={styles.settingIcon} />
                 <View>
@@ -1218,7 +1218,7 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleDataExport}>
               <View style={styles.settingLeft}>
                 <Ionicons name="cloud-upload" size={20} color={theme.colors.info} style={styles.settingIcon} />
                 <View>
@@ -1236,7 +1236,7 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
           <Text style={styles.sectionTitle}>Privacy & Data</Text>
           
           <View style={styles.settingsCard}>
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
               <View style={styles.settingLeft}>
                 <Ionicons name="document-text" size={20} color={theme.colors.primary} style={styles.settingIcon} />
                 <View>
@@ -1249,7 +1249,7 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleHelpSupport}>
               <View style={styles.settingLeft}>
                 <Ionicons name="help-circle" size={20} color={theme.colors.primary} style={styles.settingIcon} />
                 <View>
