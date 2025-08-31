@@ -20,6 +20,10 @@ class SpendWiseAPITester:
         self.base_url = BASE_URL
         self.headers = HEADERS
         self.test_results = []
+        self.auth_token = None
+        self.refresh_token = None
+        self.test_user_email = f"testuser_{int(time.time())}@spendwise.com"
+        self.test_user_password = "TestPass123!"
         self.created_resources = {
             'transactions': [],
             'categories': [],
