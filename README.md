@@ -191,6 +191,9 @@ DB_NAME="spendwise_production"
 RAZORPAY_KEY_ID="rzp_live_your_key_id"
 RAZORPAY_KEY_SECRET="your_key_secret"
 
+# AI Integration (Get from Emergent Platform)
+EMERGENT_LLM_KEY="sk-emergent-your-universal-key"
+
 # Blockchain (Optional)
 POLYGON_RPC_URL="https://polygon-mainnet.infura.io/v3/YOUR_INFURA_KEY"
 POLYGON_TESTNET_RPC_URL="https://polygon-mumbai.infura.io/v3/YOUR_INFURA_KEY"
