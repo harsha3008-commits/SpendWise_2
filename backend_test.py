@@ -85,6 +85,285 @@ class SpendWiseAPITester:
         hash_input = f"{tx_data['id']}|{tx_data['amount']}|{tx_data['currency']}|{tx_data['categoryId']}|{tx_data['timestamp']}|{tx_data.get('billDueAt', '')}|{tx_data['previousHash']}"
         return hashlib.sha256(hash_input.encode()).hexdigest()
 
+    # ===== AUTHENTICATION TESTS =====
+    
+    def test_user_registration(self):
+        """Test user registration with JWT authentication"""
+        user_data = {
+            "email": self.test_user_email,
+            "password": self.test_user_password
+        }
+        
+        success, data, status_code = self.make_request("POST", "/auth/register", user_data)
+        
+        if success and isinstance(data, dict) and "access_token" in data:
+            self.auth_token = data["access_token"]
+            self.refresh_token = data["refresh_token"]
+            self.log_test("User Registration", True, f"User registered successfully with JWT tokens")
+            return True
+        else:
+            self.log_test("User Registration", False, f"Registration failed. Status: {status_code}", data)
+            return False
+
+    def test_user_login(self):
+        """Test user login with existing credentials"""
+        login_data = {
+            "email": self.test_user_email,
+            "password": self.test_user_password
+        }
+        
+        success, data, status_code = self.make_request("POST", "/auth/login", login_data)
+        
+        if success and isinstance(data, dict) and "access_token" in data:
+            self.auth_token = data["access_token"]
+            self.refresh_token = data["refresh_token"]
+            self.log_test("User Login", True, f"Login successful with JWT tokens")
+            return True
+        else:
+            self.log_test("User Login", False, f"Login failed. Status: {status_code}", data)
+            return False
+
+    def test_token_refresh(self):
+        """Test JWT token refresh functionality"""
+        if not self.refresh_token:
+            self.log_test("Token Refresh", False, "No refresh token available")
+            return False
+        
+        # Use refresh token in Authorization header
+        headers = self.headers.copy()
+        headers["Authorization"] = f"Bearer {self.refresh_token}"
+        
+        try:
+            response = requests.post(f"{self.base_url}/auth/refresh", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data:
+                    self.auth_token = data["access_token"]
+                    self.refresh_token = data["refresh_token"]
+                    self.log_test("Token Refresh", True, "Token refreshed successfully")
+                    return True
+            
+            self.log_test("Token Refresh", False, f"Token refresh failed. Status: {response.status_code}")
+            return False
+        except Exception as e:
+            self.log_test("Token Refresh", False, f"Token refresh error: {str(e)}")
+            return False
+
+    def test_invalid_token_rejection(self):
+        """Test that invalid tokens are properly rejected"""
+        # Save current token
+        original_token = self.auth_token
+        
+        # Use invalid token
+        self.auth_token = "invalid_token_12345"
+        
+        success, data, status_code = self.make_request("GET", "/transactions", use_auth=True)
+        
+        # Restore original token
+        self.auth_token = original_token
+        
+        if status_code == 401:
+            self.log_test("Invalid Token Rejection", True, "Invalid token correctly rejected with 401")
+        else:
+            self.log_test("Invalid Token Rejection", False, f"Expected 401, got {status_code}")
+
+    def test_unauthorized_access_protection(self):
+        """Test that endpoints require authentication"""
+        # Save current token
+        original_token = self.auth_token
+        
+        # Remove token
+        self.auth_token = None
+        
+        success, data, status_code = self.make_request("GET", "/transactions", use_auth=True)
+        
+        # Restore original token
+        self.auth_token = original_token
+        
+        if status_code in [401, 403]:
+            self.log_test("Unauthorized Access Protection", True, f"Unauthorized access correctly blocked with {status_code}")
+        else:
+            self.log_test("Unauthorized Access Protection", False, f"Expected 401/403, got {status_code}")
+
+    # ===== AI ANALYSIS TESTS =====
+    
+    def test_ai_expense_analysis(self):
+        """Test AI-powered expense analysis endpoint"""
+        if not self.auth_token:
+            self.log_test("AI Expense Analysis", False, "No authentication token available")
+            return
+        
+        # First create some test transactions for analysis
+        self.create_sample_transactions_for_ai()
+        
+        analysis_data = {
+            "user_id": "test-user-id",  # This should be extracted from JWT in real implementation
+            "analysis_type": "spending_patterns",
+            "time_period": "current_month"
+        }
+        
+        success, data, status_code = self.make_request("POST", "/ai/analyze", analysis_data, use_auth=True)
+        
+        if success and isinstance(data, dict):
+            required_fields = ["success", "analysis_type", "insights", "recommendations", "summary"]
+            if all(field in data for field in required_fields):
+                self.log_test("AI Expense Analysis", True, f"AI analysis completed with {len(data.get('insights', []))} insights")
+            else:
+                missing_fields = [field for field in required_fields if field not in data]
+                self.log_test("AI Expense Analysis", False, f"Missing required fields: {missing_fields}")
+        else:
+            self.log_test("AI Expense Analysis", False, f"AI analysis failed. Status: {status_code}", data)
+
+    def test_ai_budget_suggestions(self):
+        """Test AI budget suggestions analysis"""
+        if not self.auth_token:
+            self.log_test("AI Budget Suggestions", False, "No authentication token available")
+            return
+        
+        analysis_data = {
+            "user_id": "test-user-id",
+            "analysis_type": "budget_suggestions",
+            "time_period": "current_month"
+        }
+        
+        success, data, status_code = self.make_request("POST", "/ai/analyze", analysis_data, use_auth=True)
+        
+        if success and isinstance(data, dict) and data.get("success"):
+            self.log_test("AI Budget Suggestions", True, f"Budget suggestions generated successfully")
+        else:
+            self.log_test("AI Budget Suggestions", False, f"Budget suggestions failed. Status: {status_code}", data)
+
+    def test_ai_quick_insights(self):
+        """Test quick AI insights for dashboard"""
+        if not self.auth_token:
+            self.log_test("AI Quick Insights", False, "No authentication token available")
+            return
+        
+        success, data, status_code = self.make_request("GET", "/ai/quick-insights", use_auth=True)
+        
+        if success and isinstance(data, dict) and "insights" in data:
+            insights = data["insights"]
+            if isinstance(insights, list) and len(insights) > 0:
+                self.log_test("AI Quick Insights", True, f"Retrieved {len(insights)} quick insights")
+            else:
+                self.log_test("AI Quick Insights", True, "No insights available (expected for new user)")
+        else:
+            self.log_test("AI Quick Insights", False, f"Quick insights failed. Status: {status_code}", data)
+
+    # ===== PREMIUM FEATURES TESTS =====
+    
+    def test_premium_status_check(self):
+        """Test premium subscription status endpoint"""
+        if not self.auth_token:
+            self.log_test("Premium Status Check", False, "No authentication token available")
+            return
+        
+        success, data, status_code = self.make_request("GET", "/premium/status", use_auth=True)
+        
+        if success and isinstance(data, dict):
+            required_fields = ["isPremium", "plan", "features"]
+            if all(field in data for field in required_fields):
+                self.log_test("Premium Status Check", True, f"Premium status: {data.get('plan', 'unknown')}")
+            else:
+                missing_fields = [field for field in required_fields if field not in data]
+                self.log_test("Premium Status Check", False, f"Missing required fields: {missing_fields}")
+        else:
+            self.log_test("Premium Status Check", False, f"Premium status check failed. Status: {status_code}", data)
+
+    def test_premium_upgrade(self):
+        """Test premium upgrade functionality"""
+        if not self.auth_token:
+            self.log_test("Premium Upgrade", False, "No authentication token available")
+            return
+        
+        success, data, status_code = self.make_request("POST", "/premium/upgrade", use_auth=True)
+        
+        if success and isinstance(data, dict):
+            if data.get("success") and data.get("isPremium"):
+                self.log_test("Premium Upgrade", True, "Premium upgrade successful")
+            else:
+                self.log_test("Premium Upgrade", False, "Premium upgrade response invalid", data)
+        else:
+            self.log_test("Premium Upgrade", False, f"Premium upgrade failed. Status: {status_code}", data)
+
+    def test_monthly_report_generation(self):
+        """Test monthly financial report generation"""
+        if not self.auth_token:
+            self.log_test("Monthly Report Generation", False, "No authentication token available")
+            return
+        
+        success, data, status_code = self.make_request("GET", "/analytics/monthly-report", use_auth=True)
+        
+        if success and isinstance(data, dict):
+            required_fields = ["success", "totalIncome", "totalExpenses", "netSavings", "healthScore"]
+            if all(field in data for field in required_fields):
+                self.log_test("Monthly Report Generation", True, f"Monthly report generated with health score: {data.get('healthScore', 'N/A')}")
+            else:
+                missing_fields = [field for field in required_fields if field not in data]
+                self.log_test("Monthly Report Generation", False, f"Missing required fields: {missing_fields}")
+        else:
+            self.log_test("Monthly Report Generation", False, f"Monthly report failed. Status: {status_code}", data)
+
+    def test_rate_limiting_on_ai_endpoints(self):
+        """Test rate limiting on AI analysis endpoints"""
+        if not self.auth_token:
+            self.log_test("Rate Limiting on AI Endpoints", False, "No authentication token available")
+            return
+        
+        analysis_data = {
+            "user_id": "test-user-id",
+            "analysis_type": "spending_patterns",
+            "time_period": "current_month"
+        }
+        
+        # Make multiple rapid requests to test rate limiting
+        rate_limited = False
+        for i in range(12):  # Exceed the 10/minute limit
+            success, data, status_code = self.make_request("POST", "/ai/analyze", analysis_data, use_auth=True)
+            if status_code == 429:  # Too Many Requests
+                rate_limited = True
+                break
+            time.sleep(0.1)  # Small delay between requests
+        
+        if rate_limited:
+            self.log_test("Rate Limiting on AI Endpoints", True, "Rate limiting working correctly (429 status)")
+        else:
+            self.log_test("Rate Limiting on AI Endpoints", False, "Rate limiting not triggered or not working")
+
+    def create_sample_transactions_for_ai(self):
+        """Create sample transactions for AI analysis testing"""
+        if not self.auth_token:
+            return
+        
+        # Create a category first
+        category_data = {
+            "name": "AI Test Food",
+            "icon": "🍔",
+            "color": "#FF5722",
+            "type": "expense"
+        }
+        
+        success, cat_data, _ = self.make_request("POST", "/categories", category_data, use_auth=True)
+        if not success:
+            return
+        
+        category_id = cat_data.get("id")
+        if not category_id:
+            return
+        
+        # Create sample transactions
+        sample_transactions = [
+            {"type": "expense", "amount": 250.0, "categoryId": category_id, "note": "Lunch at restaurant"},
+            {"type": "expense", "amount": 150.0, "categoryId": category_id, "note": "Grocery shopping"},
+            {"type": "income", "amount": 5000.0, "categoryId": category_id, "note": "Salary payment"},
+            {"type": "expense", "amount": 80.0, "categoryId": category_id, "note": "Coffee and snacks"}
+        ]
+        
+        for tx_data in sample_transactions:
+            tx_data["currency"] = "INR"
+            self.make_request("POST", "/transactions", tx_data, use_auth=True)
+
     def test_health_check(self):
         """Test health check endpoint"""
         success, data, status_code = self.make_request("GET", "/health")
