@@ -334,10 +334,43 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
     }
   };
 
-  const handleProfileUpdate = () => {
-    // TODO: Implement profile update API call
-    Alert.alert('Success', 'Profile updated successfully!');
-    setShowProfileEdit(false);
+  const handleProfileUpdate = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('Error', 'Please login again');
+        return;
+      }
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/${user?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: profileData.name,
+          email: profileData.email,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        Alert.alert('Success', 'Profile updated successfully!');
+        setShowProfileEdit(false);
+        // Update local profile data
+        setProfileData({
+          name: updatedUser.full_name || updatedUser.email,
+          email: updatedUser.email,
+        });
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Error', errorData.detail || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    }
   };
 
   const handlePasswordChange = () => {
