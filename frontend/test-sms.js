@@ -71,7 +71,7 @@ function parseSMS(sms, sender) {
         category = 'Transport';
       } else if (['netflix', 'spotify', 'hotstar', 'entertainment', 'movie'].some(k => lowerText.includes(k))) {
         category = 'Entertainment';
-      } else if =['electricity', 'water', 'gas', 'bill', 'recharge'].some(k => lowerText.includes(k))) {
+      } else if (['electricity', 'water', 'gas', 'bill', 'recharge'].some(k => lowerText.includes(k))) {
         category = 'Bills';
       } else if (['apollo', 'hospital', 'pharmacy', 'medical', 'doctor'].some(k => lowerText.includes(k))) {
         category = 'Healthcare';
