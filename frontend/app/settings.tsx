@@ -43,6 +43,13 @@ export default function SettingsScreen() {
     locationAccess: false,
   });
   
+  // SMS service state
+  const [smsStats, setSmsStats] = useState({
+    total: 0,
+    autoDetected: 0,
+    lastDetected: undefined as string | undefined,
+  });
+  
   // Premium settings state
   const [isPremium, setIsPremium] = useState(false);
   const [premiumFeatures, setPremiumFeatures] = useState({
@@ -50,6 +57,27 @@ export default function SettingsScreen() {
     monthlyReports: false,
     prioritySupport: false,
   });
+
+  // Load SMS service state on component mount
+  useEffect(() => {
+    const loadSmsServiceState = async () => {
+      try {
+        const config = smsService.getConfig();
+        const stats = await smsService.getStats();
+        
+        setPermissions(prev => ({
+          ...prev,
+          smsAccess: config.isEnabled
+        }));
+        
+        setSmsStats(stats);
+      } catch (error) {
+        console.error('Error loading SMS service state:', error);
+      }
+    };
+
+    loadSmsServiceState();
+  }, []);
 
   const handleLogout = async () => {
     Alert.alert(
