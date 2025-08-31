@@ -373,7 +373,7 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
     }
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       Alert.alert('Error', 'New passwords do not match');
       return;
@@ -382,10 +382,38 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
       Alert.alert('Error', 'Password must be at least 8 characters long');
       return;
     }
-    // TODO: Implement password change API call
-    Alert.alert('Success', 'Password changed successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setShowChangePassword(false);
+
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('Error', 'Please login again');
+        return;
+      }
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/api/users/${user?.id}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Password changed successfully!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setShowChangePassword(false);
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Error', errorData.detail || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Password change error:', error);
+      Alert.alert('Error', 'Failed to change password. Please try again.');
+    }
   };
 
   const handleProfilePictureChange = async () => {
