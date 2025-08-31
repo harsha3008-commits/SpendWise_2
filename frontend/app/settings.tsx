@@ -419,30 +419,105 @@ ${new Date().toISOString().split('T')[0]},Bills,Expense,3000,Electricity bill`;
     );
   };
 
-  const handleSMSPermission = () => {
+  const handleSMSPermission = async () => {
     if (Platform.OS === 'android') {
-      Alert.alert(
-        'SMS Permission',
-        'Enable SMS access to automatically detect and categorize transactions from bank SMS messages.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Enable', 
-            onPress: () => {
-              // TODO: Request SMS permission and update state
-              setPermissions({ ...permissions, smsAccess: true });
-              Alert.alert('Permission Granted', 'SMS transaction detection is now enabled');
+      if (permissions.smsAccess) {
+        // Disable SMS service
+        Alert.alert(
+          'Disable SMS Auto-Detection',
+          'Are you sure you want to disable automatic transaction detection from SMS?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Disable', 
+              style: 'destructive',
+              onPress: async () => {
+                await smsService.disable();
+                setPermissions({ ...permissions, smsAccess: false });
+                Alert.alert('Disabled', 'SMS auto-detection has been disabled');
+              }
             }
-          }
-        ]
-      );
+          ]
+        );
+      } else {
+        // Enable SMS service
+        Alert.alert(
+          'Enable SMS Auto-Detection',
+          '🎯 SpendWise can automatically detect transactions from your bank SMS messages.\n\n✅ Supports: SBI, HDFC, ICICI, Axis, Kotak, PhonePe, GPay, Paytm\n\n🔒 Privacy: All SMS data is processed locally on your device',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Enable Auto-Detection', 
+              onPress: async () => {
+                const enabled = await smsService.enable();
+                if (enabled) {
+                  setPermissions({ ...permissions, smsAccess: true });
+                  
+                  // Start processing mock SMS for demo
+                  setTimeout(() => {
+                    Alert.alert(
+                      '🎉 SMS Auto-Detection Active',
+                      'SpendWise will now automatically detect transactions. You\'ll see a demo transaction in a few seconds!',
+                      [{ text: 'Great!' }]
+                    );
+                  }, 1000);
+                  
+                  // Update stats after enabling
+                  setTimeout(async () => {
+                    const newStats = await smsService.getStats();
+                    setSmsStats(newStats);
+                  }, 10000);
+                }
+              }
+            }
+          ]
+        );
+      }
     } else {
       Alert.alert(
-        'SMS Access',
-        'SMS transaction detection is not available on iOS. You can manually add transactions or use the share feature.',
+        'SMS Auto-Detection',
+        'SMS transaction detection is not available on iOS due to platform restrictions.\n\n📱 Alternative options:\n• Manual transaction entry\n• Share bank SMS to SpendWise app\n• Import from bank statements',
         [{ text: 'OK' }]
       );
     }
+  };
+
+  const handleTestSMSParser = () => {
+    Alert.alert(
+      'Test SMS Parser',
+      'Running SMS parser tests with sample bank messages...',
+      [
+        { 
+          text: 'Run Tests', 
+          onPress: () => {
+            const success = runSMSTests();
+            setTimeout(() => {
+              Alert.alert(
+                'SMS Parser Test Results',
+                success 
+                  ? '✅ All tests passed! SMS parser is working correctly for SBI, HDFC, PhonePe, GPay, and ICICI.'
+                  : '❌ Some tests failed. Check console for details.',
+                [{ text: 'OK' }]
+              );
+            }, 1000);
+          }
+        }
+      ]
+    );
+  };
+
+  const handleViewSMSStats = async () => {
+    const stats = await smsService.getStats();
+    setSmsStats(stats);
+    
+    Alert.alert(
+      'SMS Auto-Detection Stats',
+      `📊 Transaction Statistics:\n\n• Total Transactions: ${stats.total}\n• Auto-Detected: ${stats.autoDetected}\n• Last Detection: ${stats.lastDetected ? new Date(stats.lastDetected).toLocaleDateString() : 'None'}\n\n${stats.autoDetected > 0 ? '✅ SMS detection is working!' : '⏳ Waiting for bank SMS messages...'}`,
+      [
+        { text: 'Close' },
+        { text: 'Test Parser', onPress: handleTestSMSParser }
+      ]
+    );
   };
 
   const updateNotificationSetting = (key: keyof typeof notifications, value: boolean) => {
