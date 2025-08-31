@@ -965,12 +965,56 @@ ${stats.autoDetected > 0 ? '🎉 SMS detection is working great!' : '⏳ Enable 
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleTwoFactorAuth}>
               <View style={styles.settingLeft}>
                 <Ionicons name="shield-checkmark" size={20} color={theme.colors.success} style={styles.settingIcon} />
                 <View>
                   <Text style={styles.settingTitle}>Two-Factor Authentication</Text>
-                  <Text style={styles.settingSubtitle}>Enhance your account security</Text>
+                  <Text style={styles.settingSubtitle}>Add extra security to your account</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Help & Legal Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Help & Legal</Text>
+          
+          <View style={styles.settingsCard}>
+            <TouchableOpacity style={styles.settingItem} onPress={handleHelpSupport}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="help-circle" size={20} color={theme.colors.info} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Help & Support</Text>
+                  <Text style={styles.settingSubtitle}>Get help, report bugs, contact us</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem} onPress={handlePrivacyPolicy}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="document-text" size={20} color={theme.colors.warning} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Privacy Policy</Text>
+                  <Text style={styles.settingSubtitle}>How we protect your data</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity style={styles.settingItem} onPress={handleViewPricingPlans}>
+              <View style={styles.settingLeft}>
+                <Ionicons name="pricetag" size={20} color={theme.colors.primary} style={styles.settingIcon} />
+                <View>
+                  <Text style={styles.settingTitle}>Pricing Plans</Text>
+                  <Text style={styles.settingSubtitle}>Compare free vs premium features</Text>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
