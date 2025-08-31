@@ -478,7 +478,7 @@ class SpendWiseAPITester:
 
     def test_get_transactions(self):
         """Test getting all transactions"""
-        success, data, status_code = self.make_request("GET", "/transactions")
+        success, data, status_code = self.make_request("GET", "/transactions", use_auth=True)
         
         if success and isinstance(data, list):
             self.log_test("Get Transactions", True, f"Retrieved {len(data)} transactions")
@@ -489,7 +489,7 @@ class SpendWiseAPITester:
 
     def test_get_single_transaction(self, transaction_id: str):
         """Test getting a single transaction by ID"""
-        success, data, status_code = self.make_request("GET", f"/transactions/{transaction_id}")
+        success, data, status_code = self.make_request("GET", f"/transactions/{transaction_id}", use_auth=True)
         
         if success and isinstance(data, dict) and data.get("id") == transaction_id:
             self.log_test("Get Single Transaction", True, f"Retrieved transaction: {transaction_id}")
@@ -503,7 +503,7 @@ class SpendWiseAPITester:
             "note": "Updated grocery shopping amount"
         }
         
-        success, data, status_code = self.make_request("PUT", f"/transactions/{transaction_id}", update_data)
+        success, data, status_code = self.make_request("PUT", f"/transactions/{transaction_id}", update_data, use_auth=True)
         
         if success and isinstance(data, dict):
             # Verify hash was recomputed
@@ -517,7 +517,7 @@ class SpendWiseAPITester:
 
     def test_ledger_verification(self):
         """Test ledger verification endpoint"""
-        success, data, status_code = self.make_request("GET", "/ledger/verify")
+        success, data, status_code = self.make_request("GET", "/ledger/verify", use_auth=True)
         
         if success and isinstance(data, dict):
             if data.get("ok") == True:
@@ -543,7 +543,7 @@ class SpendWiseAPITester:
             "notifications": True
         }
         
-        success, data, status_code = self.make_request("POST", "/budgets", budget_data)
+        success, data, status_code = self.make_request("POST", "/budgets", budget_data, use_auth=True)
         
         if success and isinstance(data, dict) and "id" in data:
             budget_id = data["id"]
@@ -556,7 +556,7 @@ class SpendWiseAPITester:
 
     def test_get_budgets(self):
         """Test getting all budgets"""
-        success, data, status_code = self.make_request("GET", "/budgets")
+        success, data, status_code = self.make_request("GET", "/budgets", use_auth=True)
         
         if success and isinstance(data, list):
             self.log_test("Get Budgets", True, f"Retrieved {len(data)} budgets")
@@ -577,7 +577,7 @@ class SpendWiseAPITester:
             "reminderDays": [7, 3, 1]
         }
         
-        success, data, status_code = self.make_request("POST", "/bills", bill_data)
+        success, data, status_code = self.make_request("POST", "/bills", bill_data, use_auth=True)
         
         if success and isinstance(data, dict) and "id" in data:
             bill_id = data["id"]
@@ -590,7 +590,7 @@ class SpendWiseAPITester:
 
     def test_get_bills(self):
         """Test getting all bills"""
-        success, data, status_code = self.make_request("GET", "/bills")
+        success, data, status_code = self.make_request("GET", "/bills", use_auth=True)
         
         if success and isinstance(data, list):
             self.log_test("Get Bills", True, f"Retrieved {len(data)} bills")
@@ -605,7 +605,7 @@ class SpendWiseAPITester:
             "receipt": f"receipt_{int(time.time())}"
         }
         
-        success, data, status_code = self.make_request("POST", "/payments/create-order", order_data)
+        success, data, status_code = self.make_request("POST", "/payments/create-order", order_data, use_auth=True)
         
         if success and isinstance(data, dict) and "id" in data:
             self.log_test("Create Payment Order", True, f"Created Razorpay order: {data['id']}")
@@ -616,7 +616,7 @@ class SpendWiseAPITester:
 
     def test_analytics_summary(self):
         """Test analytics summary endpoint"""
-        success, data, status_code = self.make_request("GET", "/analytics/summary")
+        success, data, status_code = self.make_request("GET", "/analytics/summary", use_auth=True)
         
         if success and isinstance(data, dict):
             required_fields = ["totalIncome", "totalExpenses", "netWorth", "categoryBreakdown", "transactionCount"]
@@ -630,7 +630,7 @@ class SpendWiseAPITester:
 
     def test_delete_transaction(self, transaction_id: str):
         """Test deleting a transaction"""
-        success, data, status_code = self.make_request("DELETE", f"/transactions/{transaction_id}")
+        success, data, status_code = self.make_request("DELETE", f"/transactions/{transaction_id}", use_auth=True)
         
         if success:
             self.log_test("Delete Transaction", True, f"Successfully deleted transaction: {transaction_id}")
