@@ -32,6 +32,12 @@ export default function DashboardScreen() {
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [quickTransaction, setQuickTransaction] = useState<QuickTransaction | null>(null);
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddData, setQuickAddData] = useState({
+    type: 'expense' as 'expense' | 'income',
+    amount: '',
+    description: '',
+  });
 
   const { user, logout } = useAuth();
   const { theme } = useTheme();
