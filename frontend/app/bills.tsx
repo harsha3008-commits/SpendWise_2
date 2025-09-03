@@ -93,6 +93,17 @@ export default function BillsScreen() {
     Alert.alert('Success', 'Bill marked as paid!');
   };
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setNewBill({ ...newBill, dueDate: selectedDate });
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
   const getDaysUntilDue = (dueDate: Date) => {
     const today = new Date();
     const diffTime = dueDate.getTime() - today.getTime();
