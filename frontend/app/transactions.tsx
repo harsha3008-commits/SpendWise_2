@@ -211,9 +211,21 @@ export default function TransactionsScreen() {
           size={20} 
           color={transaction.type === 'income' ? theme.colors.income : theme.colors.expense} 
         />
+        {transaction.isAutoDetected && (
+          <View style={styles.autoDetectedBadge}>
+            <Ionicons name="flash" size={8} color={theme.colors.warning} />
+          </View>
+        )}
       </View>
       <View style={styles.transactionDetails}>
-        <Text style={[styles.transactionCategory, { color: theme.colors.text }]}>{transaction.category}</Text>
+        <View style={styles.transactionHeader}>
+          <Text style={[styles.transactionCategory, { color: theme.colors.text }]}>{transaction.category}</Text>
+          {transaction.isAutoDetected && (
+            <View style={styles.autoDetectedLabel}>
+              <Text style={styles.autoDetectedText}>SMS</Text>
+            </View>
+          )}
+        </View>
         <Text style={[styles.transactionDescription, { color: theme.colors.textSecondary }]}>{transaction.description}</Text>
         {transaction.merchant && (
           <Text style={[styles.transactionMerchant, { color: theme.colors.textSecondary }]}>{transaction.merchant}</Text>
@@ -221,6 +233,11 @@ export default function TransactionsScreen() {
         <Text style={[styles.transactionDate, { color: theme.colors.textSecondary }]}>
           {format(new Date(transaction.date), 'MMM dd, yyyy • hh:mm a')}
         </Text>
+        {transaction.currentHash && (
+          <Text style={[styles.transactionHash, { color: theme.colors.info }]}>
+            🔗 {transaction.currentHash.substring(0, 8)}...
+          </Text>
+        )}
       </View>
       <Text style={[
         styles.transactionAmount,
