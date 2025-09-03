@@ -56,21 +56,10 @@ export default function SettingsScreen() {
     prioritySupport: false,
   });
 
-  // Load SMS service state and user profile on component mount
+  // Load notification settings on component mount
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Load SMS service state
-        const config = smsService.getConfig();
-        const stats = await smsService.getStats();
-        
-        setPermissions(prev => ({
-          ...prev,
-          smsAccess: config.isEnabled
-        }));
-        
-        setSmsStats(stats);
-
         // Load saved notification settings
         try {
           const savedNotifications = await AsyncStorage.getItem('notification_settings');
