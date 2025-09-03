@@ -618,4 +618,72 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.textSecondary,
     lineHeight: 20,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  quickAddModal: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 0,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    padding: 20,
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  cancelButton: {
+    opacity: 0.8,
+  },
+  saveButton: {
+    // Primary color applied via inline style
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
 });
