@@ -4,7 +4,6 @@
  */
 
 import { Platform, PermissionsAndroid, Alert, AppState } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { parseSMS, ParsedTransaction } from './smsParser';
 import { storageService } from './storage';
 
