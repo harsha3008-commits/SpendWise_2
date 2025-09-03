@@ -279,15 +279,15 @@ export default function DashboardScreen() {
               <Text style={styles.smsStatusTitle}>SMS Auto-Detection</Text>
               <View style={[
                 styles.smsStatusBadge, 
-                { backgroundColor: smsService.getConfig().isEnabled ? theme.colors.success : theme.colors.textSecondary }
+                { backgroundColor: false ? theme.colors.success : theme.colors.textSecondary }
               ]}>
                 <Text style={styles.smsStatusBadgeText}>
-                  {smsService.getConfig().isEnabled ? 'Active' : 'Inactive'}
+                  {false ? 'Active' : 'Inactive'}
                 </Text>
               </View>
             </View>
             <Text style={styles.smsStatusDescription}>
-              {smsService.getConfig().isEnabled 
+              {false 
                 ? 'Automatically detecting transactions from bank SMS'
                 : 'Enable in Settings to auto-detect transactions'
               }
