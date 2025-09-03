@@ -396,6 +396,12 @@ class SmsBackgroundService {
    */
   private async loadConfig(): Promise<void> {
     try {
+      // Skip loading config in web environment
+      if (typeof window !== 'undefined' || Platform.OS === 'web') {
+        console.log('Skipping SMS config loading in web environment');
+        return;
+      }
+
       // Check if we're in a web environment
       if (typeof window !== 'undefined' && window.localStorage) {
         // Use localStorage for web
