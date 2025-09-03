@@ -9,11 +9,14 @@ import {
   Modal,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLocalSearchParams } from 'expo-router';
+import { transactionAPI } from '../lib/api';
 import { smsService } from '../lib/SmsService';
 
 interface Transaction {
@@ -21,21 +24,25 @@ interface Transaction {
   type: 'income' | 'expense';
   amount: number;
   category: string;
+  categoryId: string;
+  note: string;
   description: string;
   date: string;
+  timestamp: number;
   isAutoDetected?: boolean;
   smsReference?: string;
-  amount: number;
-  category: string;
-  description: string;
-  date: string;
   merchant?: string;
+  user_id?: string;
+  currentHash?: string;
+  previousHash?: string;
 }
 
 export default function TransactionsScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addingTransaction, setAddingTransaction] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
     type: 'expense' as 'income' | 'expense',
     amount: '',
@@ -45,6 +52,7 @@ export default function TransactionsScreen() {
   });
 
   const { theme } = useTheme();
+  const params = useLocalSearchParams();
 
   const categories = [
     '🍽️ Food & Dining',
@@ -61,66 +69,138 @@ export default function TransactionsScreen() {
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+    
+    // Initialize SMS service for auto-detection
+    initializeSMSService();
+    
+    // Pre-fill form if type is specified in URL params
+    if (params.type && (params.type === 'expense' || params.type === 'income')) {
+      setNewTransaction(prev => ({ ...prev, type: params.type as 'expense' | 'income' }));
+      setShowAddModal(true);
+    }
+  }, [params]);
 
-  const loadTransactions = () => {
-    // Simulate loading transactions
-    const mockTransactions: Transaction[] = [
-      {
-        id: '1',
-        type: 'expense',
-        amount: 250,
-        category: '🍽️ Food & Dining',
-        description: 'Lunch at cafe',
-        date: new Date().toISOString(),
-        merchant: 'Café Central',
-      },
-      {
-        id: '2',
-        type: 'income',
-        amount: 5000,
-        category: '💼 Salary',
-        description: 'Monthly salary',
-        date: new Date(Date.now() - 86400000).toISOString(),
-      },
-    ];
-    setTransactions(mockTransactions);
+  const initializeSMSService = async () => {
+    try {
+      await smsService.initialize();
+      
+      // Listen for new SMS transactions
+      smsService.addTransactionListener((parsedTransaction) => {
+        console.log('New SMS transaction in transactions screen:', parsedTransaction);
+        // Refresh transactions when new SMS transaction is detected
+        loadTransactions();
+      });
+    } catch (error) {
+      console.error('Failed to initialize SMS service in transactions:', error);
+    }
   };
 
-  const onRefresh = () => {
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      const data = await transactionAPI.getAll(0, 50);
+      
+      // Transform backend data to match frontend interface
+      const transformedTransactions = data.map((tx: any) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: tx.amount,
+        category: tx.categoryId || 'Other',
+        categoryId: tx.categoryId,
+        note: tx.note || '',
+        description: tx.note || tx.merchant || `${tx.type} transaction`,
+        date: new Date(tx.timestamp).toISOString(),
+        timestamp: tx.timestamp,
+        merchant: tx.merchant,
+        user_id: tx.user_id,
+        currentHash: tx.currentHash,
+        previousHash: tx.previousHash,
+        isAutoDetected: tx.isAutoDetected || false,
+      }));
+      
+      setTransactions(transformedTransactions);
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+      // Show mock data if API fails
+      const mockTransactions: Transaction[] = [
+        {
+          id: '1',
+          type: 'expense',
+          amount: 250,
+          category: '🍽️ Food & Dining',
+          categoryId: 'food',
+          note: 'Lunch at cafe',
+          description: 'Lunch at cafe',
+          date: new Date().toISOString(),
+          timestamp: Date.now(),
+          merchant: 'Café Central',
+        },
+        {
+          id: '2',
+          type: 'income',
+          amount: 5000,
+          category: '💼 Salary',
+          categoryId: 'salary',
+          note: 'Monthly salary',
+          description: 'Monthly salary',
+          date: new Date(Date.now() - 86400000).toISOString(),
+          timestamp: Date.now() - 86400000,
+        },
+      ];
+      setTransactions(mockTransactions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      loadTransactions();
-      setRefreshing(false);
-    }, 1000);
+    await loadTransactions();
+    setRefreshing(false);
   };
 
-  const addTransaction = () => {
+  const addTransaction = async () => {
     if (!newTransaction.amount || !newTransaction.category || !newTransaction.description) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    const transaction: Transaction = {
-      id: Date.now().toString(),
-      type: newTransaction.type,
-      amount: parseFloat(newTransaction.amount),
-      category: newTransaction.category,
-      description: newTransaction.description,
-      date: new Date().toISOString(),
-      merchant: newTransaction.merchant || undefined,
-    };
+    try {
+      setAddingTransaction(true);
 
-    setTransactions([transaction, ...transactions]);
-    setNewTransaction({
-      type: 'expense',
-      amount: '',
-      category: '',
-      description: '',
-      merchant: '',
-    });
-    setShowAddModal(false);
-    Alert.alert('Success', 'Transaction added successfully!');
+      const transactionData = {
+        type: newTransaction.type,
+        amount: parseFloat(newTransaction.amount),
+        currency: 'INR',
+        categoryId: newTransaction.category.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        note: newTransaction.description,
+        merchant: newTransaction.merchant || undefined,
+        timestamp: Date.now(),
+      };
+
+      const savedTransaction = await transactionAPI.create(transactionData);
+      
+      // Refresh the transactions list
+      await loadTransactions();
+      
+      // Reset form
+      setNewTransaction({
+        type: 'expense',
+        amount: '',
+        category: '',
+        description: '',
+        merchant: '',
+      });
+      
+      setShowAddModal(false);
+      Alert.alert('Success', 'Transaction added successfully!');
+      
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      Alert.alert('Error', 'Failed to add transaction. Please try again.');
+    } finally {
+      setAddingTransaction(false);
+    }
   };
 
   const renderTransaction = (transaction: Transaction) => (
