@@ -79,6 +79,8 @@ export default function TransactionsScreen() {
   const loadTransactions = async () => {
     try {
       setLoading(true);
+      
+      // Try to load from API
       const data = await transactionAPI.getAll(0, 50);
       
       // Transform backend data to match frontend interface
@@ -102,7 +104,13 @@ export default function TransactionsScreen() {
       setTransactions(transformedTransactions);
     } catch (error) {
       console.error('Error loading transactions:', error);
-      // Show mock data if API fails
+      
+      // Check if it's a rate limiting error (429) or any other API error
+      if (error.response?.status === 429) {
+        Alert.alert('Rate Limit', 'Too many requests. Showing demo data.');
+      }
+      
+      // Always show mock data if API fails (including rate limiting)
       const mockTransactions: Transaction[] = [
         {
           id: '1',
@@ -111,7 +119,7 @@ export default function TransactionsScreen() {
           category: '🍽️ Food & Dining',
           categoryId: 'food',
           note: 'Lunch at cafe',
-          description: 'Lunch at cafe',
+          description: 'Lunch at downtown cafe',
           date: new Date().toISOString(),
           timestamp: Date.now(),
           merchant: 'Café Central',
@@ -122,10 +130,35 @@ export default function TransactionsScreen() {
           amount: 5000,
           category: '💼 Salary',
           categoryId: 'salary',
-          note: 'Monthly salary',
-          description: 'Monthly salary',
+          note: 'Monthly salary deposit',
+          description: 'Monthly salary deposit',
           date: new Date(Date.now() - 86400000).toISOString(),
           timestamp: Date.now() - 86400000,
+        },
+        {
+          id: '3',
+          type: 'expense',
+          amount: 1200,
+          category: '🛍️ Shopping',
+          categoryId: 'shopping',
+          note: 'Grocery shopping',
+          description: 'Weekly grocery shopping',
+          date: new Date(Date.now() - 172800000).toISOString(),
+          timestamp: Date.now() - 172800000,
+          merchant: 'Supermarket Plus',
+        },
+        {
+          id: '4',
+          type: 'expense',
+          amount: 80,
+          category: '🚗 Transportation',
+          categoryId: 'transport',
+          note: 'Uber ride',
+          description: 'Uber ride to airport',
+          date: new Date(Date.now() - 259200000).toISOString(),
+          timestamp: Date.now() - 259200000,
+          merchant: 'Uber',
+          isAutoDetected: true,
         },
       ];
       setTransactions(mockTransactions);
