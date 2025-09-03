@@ -9,8 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
-import { runSMSTests } from '../lib/smsParser';
-
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
   const { theme, isDark, toggleTheme } = useTheme();
