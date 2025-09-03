@@ -473,12 +473,6 @@ class SmsBackgroundService {
 // Create and export the singleton service instance
 export const smsService = new SmsBackgroundService();
 
-// Auto-initialize only in native mobile environment
-// Skip auto-initialization in web environment to prevent crashes
-if (typeof window === 'undefined' && Platform.OS !== 'web') {
-  try {
-    smsService.initialize().catch(console.error);
-  } catch (error) {
-    console.warn('SMS service auto-initialization failed:', error);
-  }
-}
+// Skip auto-initialization completely in development/web environment
+// This prevents the service from initializing when the module is imported
+// which could cause crashes in web environments
