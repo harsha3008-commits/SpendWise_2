@@ -31,6 +31,7 @@ export default function BillsScreen() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDateString, setTempDateString] = useState('');
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
