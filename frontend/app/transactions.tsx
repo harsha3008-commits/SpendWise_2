@@ -415,7 +415,7 @@ export default function TransactionsScreen() {
               <Text style={[styles.transactionsTitle, { color: theme.colors.text }]}>
                 Recent Transactions ({transactions.length})
               </Text>
-              <TouchableOpacity style={styles.filterButton}>
+              <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
                 <Ionicons name="filter" size={16} color={theme.colors.primary} />
                 <Text style={[styles.filterText, { color: theme.colors.primary }]}>Filter</Text>
               </TouchableOpacity>
