@@ -275,12 +275,19 @@ export default function TransactionsScreen() {
           />
         }
       >
-        {transactions.length === 0 ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+              Loading transactions...
+            </Text>
+          </View>
+        ) : transactions.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={60} color={theme.colors.textSecondary} />
             <Text style={[styles.emptyStateTitle, { color: theme.colors.text }]}>No transactions yet</Text>
             <Text style={[styles.emptyStateSubtitle, { color: theme.colors.textSecondary }]}>
-              Add your first transaction to get started with tracking your finances
+              Add your first transaction or enable SMS auto-detection in Settings to get started
             </Text>
             <TouchableOpacity
               style={styles.emptyStateButton}
@@ -291,6 +298,15 @@ export default function TransactionsScreen() {
           </View>
         ) : (
           <View style={styles.transactionsList}>
+            <View style={styles.transactionsHeader}>
+              <Text style={[styles.transactionsTitle, { color: theme.colors.text }]}>
+                Recent Transactions ({transactions.length})
+              </Text>
+              <TouchableOpacity style={styles.filterButton}>
+                <Ionicons name="filter" size={16} color={theme.colors.primary} />
+                <Text style={[styles.filterText, { color: theme.colors.primary }]}>Filter</Text>
+              </TouchableOpacity>
+            </View>
             {transactions.map(renderTransaction)}
           </View>
         )}
