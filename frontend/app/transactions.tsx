@@ -67,14 +67,17 @@ export default function TransactionsScreen() {
   ];
 
   useEffect(() => {
+    // Load transactions only once when component mounts
     loadTransactions();
-    
-    // Pre-fill form if type is specified in URL params
+  }, []); // Empty dependency array to run only once
+
+  useEffect(() => {
+    // Handle URL params separately to avoid re-loading transactions
     if (params.type && (params.type === 'expense' || params.type === 'income')) {
       setNewTransaction(prev => ({ ...prev, type: params.type as 'expense' | 'income' }));
       setShowAddModal(true);
     }
-  }, [params]);
+  }, [params.type]); // Only depend on params.type, not the entire params object
 
   const loadTransactions = async () => {
     try {
