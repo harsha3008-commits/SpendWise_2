@@ -69,9 +69,6 @@ export default function TransactionsScreen() {
   useEffect(() => {
     loadTransactions();
     
-    // Initialize SMS service for auto-detection
-    initializeSMSService();
-    
     // Pre-fill form if type is specified in URL params
     if (params.type && (params.type === 'expense' || params.type === 'income')) {
       setNewTransaction(prev => ({ ...prev, type: params.type as 'expense' | 'income' }));
