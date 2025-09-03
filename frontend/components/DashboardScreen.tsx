@@ -519,4 +519,39 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.primary,
     fontWeight: '600',
   },
+  smsStatusCard: {
+    backgroundColor: theme.colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  smsStatusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  smsStatusTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.text,
+    flex: 1,
+  },
+  smsStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  smsStatusBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
+  },
+  smsStatusDescription: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
+  },
 });
