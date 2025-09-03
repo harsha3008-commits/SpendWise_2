@@ -326,8 +326,12 @@ export default function TransactionsScreen() {
               <Text style={styles.modalCancel}>Cancel</Text>
             </TouchableOpacity>
             <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Add Transaction</Text>
-            <TouchableOpacity onPress={addTransaction}>
-              <Text style={styles.modalSave}>Save</Text>
+            <TouchableOpacity onPress={addTransaction} disabled={addingTransaction}>
+              {addingTransaction ? (
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              ) : (
+                <Text style={styles.modalSave}>Save</Text>
+              )}
             </TouchableOpacity>
           </View>
 
