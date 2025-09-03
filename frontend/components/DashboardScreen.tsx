@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { analyticsAPI } from '../lib/api';
+import { analyticsAPI, transactionAPI } from '../lib/api';
+import { router } from 'expo-router';
+import { smsService } from '../lib/SmsService';
 
 interface DashboardStats {
   totalIncome: number;
   totalExpenses: number;
   netWorth: number;
   transactionCount: number;
+}
+
+interface QuickTransaction {
+  type: 'income' | 'expense' | 'bill';
+  amount: string;
+  category: string;
+  description: string;
+  merchant?: string;
 }
 
 export default function DashboardScreen() {
@@ -21,13 +31,41 @@ export default function DashboardScreen() {
     transactionCount: 0
   });
   const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [quickTransaction, setQuickTransaction] = useState<QuickTransaction | null>(null);
+  const [isAddingTransaction, setIsAddingTransaction] = useState(false);
 
   const { user, logout } = useAuth();
   const { theme } = useTheme();
 
   useEffect(() => {
     loadDashboardData();
+    initializeSmsService();
   }, []);
+
+  const initializeSmsService = async () => {
+    try {
+      await smsService.initialize();
+      
+      // Listen for new SMS transactions
+      smsService.addTransactionListener((parsedTransaction) => {
+        console.log('New SMS transaction detected:', parsedTransaction);
+        // Refresh dashboard data when new transaction is detected
+        loadDashboardData();
+        
+        // Show notification to user
+        Alert.alert(
+          '💰 Transaction Detected!',
+          `${parsedTransaction.type === 'credit' ? 'Income' : 'Expense'} of ₹${parsedTransaction.amount} detected from SMS`,
+          [
+            { text: 'View', onPress: () => router.push('/transactions') },
+            { text: 'OK' }
+          ]
+        );
+      });
+    } catch (error) {
+      console.error('Failed to initialize SMS service:', error);
+    }
+  };
 
   const loadDashboardData = async () => {
     setIsLoadingStats(true);
@@ -47,6 +85,62 @@ export default function DashboardScreen() {
       // Keep the default zero values
     } finally {
       setIsLoadingStats(false);
+    }
+  };
+
+  const handleQuickAction = (actionType: 'expense' | 'income' | 'bills' | 'analytics') => {
+    switch (actionType) {
+      case 'expense':
+        router.push('/transactions?type=expense');
+        break;
+      case 'income':
+        router.push('/transactions?type=income');
+        break;
+      case 'bills':
+        router.push('/bills');
+        break;
+      case 'analytics':
+        router.push('/analytics');
+        break;
+    }
+  };
+
+  const quickAddTransaction = async (type: 'expense' | 'income') => {
+    try {
+      setIsAddingTransaction(true);
+      
+      // Quick add with smart defaults
+      const defaultCategories = {
+        expense: '🍽️ Food & Dining',
+        income: '💼 Salary'
+      };
+      
+      const transactionData = {
+        type: type,
+        amount: 100, // Default amount
+        currency: 'INR',
+        categoryId: 'default-category',
+        note: `Quick ${type} added from dashboard`,
+        merchant: type === 'expense' ? 'Quick Add' : undefined,
+        timestamp: Date.now()
+      };
+
+      const newTransaction = await transactionAPI.create(transactionData);
+      
+      Alert.alert(
+        '✅ Success!',
+        `₹100 ${type} added successfully`,
+        [
+          { text: 'View All', onPress: () => router.push('/transactions') },
+          { text: 'OK', onPress: () => loadDashboardData() }
+        ]
+      );
+      
+    } catch (error) {
+      console.error('Error adding quick transaction:', error);
+      Alert.alert('Error', 'Failed to add transaction. Please try again.');
+    } finally {
+      setIsAddingTransaction(false);
     }
   };
 
