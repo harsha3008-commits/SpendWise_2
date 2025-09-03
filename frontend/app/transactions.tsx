@@ -106,8 +106,12 @@ export default function TransactionsScreen() {
       console.error('Error loading transactions:', error);
       
       // Check if it's a rate limiting error (429) or any other API error
-      if (error.response?.status === 429) {
-        Alert.alert('Rate Limit', 'Too many requests. Showing demo data.');
+      try {
+        if (error && typeof error === 'object' && 'response' in error && error.response && error.response.status === 429) {
+          console.log('Rate limited - showing demo data');
+        }
+      } catch (checkError) {
+        console.warn('Error checking response status:', checkError);
       }
       
       // Always show mock data if API fails (including rate limiting)
