@@ -292,12 +292,26 @@ export default function BillsScreen() {
 
             {/* Due Date */}
             <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Due Date</Text>
-            <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <TouchableOpacity 
+              style={[styles.dateButton, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+              onPress={showDatePickerModal}
+            >
               <Text style={[styles.dateButtonText, { color: theme.colors.text }]}>
                 {format(newBill.dueDate, 'MMM dd, yyyy')}
               </Text>
               <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
+
+            {/* Date Picker */}
+            {showDatePicker && (
+              <DateTimePicker
+                value={newBill.dueDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+              />
+            )}
 
             {/* Recurring */}
             <View style={styles.switchRow}>
