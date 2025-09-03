@@ -44,6 +44,12 @@ export default function DashboardScreen() {
 
   const initializeSmsService = async () => {
     try {
+      // Skip SMS service initialization in web environment for now
+      if (typeof window !== 'undefined') {
+        console.log('SMS service disabled in web environment');
+        return;
+      }
+      
       await smsService.initialize();
       
       // Listen for new SMS transactions
