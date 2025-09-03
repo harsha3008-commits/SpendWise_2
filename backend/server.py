@@ -1187,36 +1187,48 @@ async def get_monthly_report(
         raise HTTPException(status_code=500, detail="Report generation temporarily unavailable")
 
 @app.get("/api/premium/status")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_premium_status(
     request: Request,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get user's premium subscription status"""
+    """Get user's premium subscription status - All features are FREE"""
     try:
         user_id = current_user["id"]
         
-        # TODO: Check actual premium status from database
-        # For now, return demo status
+        # Return premium status as TRUE for all users (all features are free)
         return {
-            "isPremium": False,
-            "plan": "free",
+            "isPremium": True,  # All users get premium features for free
             "features": {
-                "aiAnalysis": False,
-                "monthlyReports": False,
-                "prioritySupport": False,
-                "advancedAnalytics": False
+                "aiAnalysis": True,
+                "monthlyReports": True,
+                "smsDetection": True,
+                "blockchainLedger": True,
+                "whatsappReports": True,
+                "advancedAnalytics": True,
+                "dataExport": True,
+                "prioritySupport": True
             },
-            "upgradeUrl": "/premium/upgrade"
+            "plan": "free_premium",
+            "expiresAt": None,  # Never expires
+            "status": "active"
         }
         
     except Exception as e:
         logger.error(f"Error checking premium status: {e}")
         return {
-            "isPremium": False,
-            "plan": "free",
-            "features": {},
-            "error": "Unable to check premium status"
+            "isPremium": True,  # Default to premium access
+            "features": {
+                "aiAnalysis": True,
+                "monthlyReports": True,
+                "smsDetection": True,
+                "blockchainLedger": True,
+                "whatsappReports": True,
+                "advancedAnalytics": True,
+                "dataExport": True,
+                "prioritySupport": True
+            },
+            "error": "Unable to check premium status, defaulting to premium access"
         }
 
 @app.post("/api/premium/upgrade")
