@@ -397,9 +397,20 @@ class SmsBackgroundService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const configStr = await AsyncStorage.getItem('@sms_service_config');
-      if (configStr) {
-        this.config = { ...this.config, ...JSON.parse(configStr) };
+      // Check if we're in a web environment
+      if (typeof window !== 'undefined' && window.localStorage) {
+        // Use localStorage for web
+        const configStr = window.localStorage.getItem('@sms_service_config');
+        if (configStr) {
+          this.config = { ...this.config, ...JSON.parse(configStr) };
+        }
+      } else {
+        // Use AsyncStorage for React Native
+        const AsyncStorage = require('@react-native-async-storage/async-storage');
+        const configStr = await AsyncStorage.getItem('@sms_service_config');
+        if (configStr) {
+          this.config = { ...this.config, ...JSON.parse(configStr) };
+        }
       }
     } catch (error) {
       console.error('Error loading SMS service config:', error);
