@@ -229,25 +229,63 @@ export default function DashboardScreen() {
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: theme.colors.expense }]}>
+            <TouchableOpacity 
+              style={[styles.actionCard, { backgroundColor: theme.colors.expense }]}
+              onPress={() => handleQuickAction('expense')}
+              disabled={isAddingTransaction}
+            >
               <Ionicons name="remove-circle" size={32} color="white" />
               <Text style={styles.actionCardText}>Add Expense</Text>
+              {isAddingTransaction && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: theme.colors.income }]}>
+            <TouchableOpacity 
+              style={[styles.actionCard, { backgroundColor: theme.colors.income }]}
+              onPress={() => handleQuickAction('income')}
+              disabled={isAddingTransaction}
+            >
               <Ionicons name="add-circle" size={32} color="white" />
               <Text style={styles.actionCardText}>Add Income</Text>
+              {isAddingTransaction && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: theme.colors.warning }]}>
+            <TouchableOpacity 
+              style={[styles.actionCard, { backgroundColor: theme.colors.warning }]}
+              onPress={() => handleQuickAction('bills')}
+            >
               <Ionicons name="card" size={32} color="white" />
               <Text style={styles.actionCardText}>Add Bill</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: theme.colors.info }]}>
+            <TouchableOpacity 
+              style={[styles.actionCard, { backgroundColor: theme.colors.info }]}
+              onPress={() => handleQuickAction('analytics')}
+            >
               <Ionicons name="bar-chart" size={32} color="white" />
               <Text style={styles.actionCardText}>Analytics</Text>
             </TouchableOpacity>
+          </View>
+          
+          {/* SMS Auto-Detection Status */}
+          <View style={styles.smsStatusCard}>
+            <View style={styles.smsStatusHeader}>
+              <Ionicons name="mail" size={20} color={theme.colors.primary} />
+              <Text style={styles.smsStatusTitle}>SMS Auto-Detection</Text>
+              <View style={[
+                styles.smsStatusBadge, 
+                { backgroundColor: smsService.getConfig().isEnabled ? theme.colors.success : theme.colors.textSecondary }
+              ]}>
+                <Text style={styles.smsStatusBadgeText}>
+                  {smsService.getConfig().isEnabled ? 'Active' : 'Inactive'}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.smsStatusDescription}>
+              {smsService.getConfig().isEnabled 
+                ? 'Automatically detecting transactions from bank SMS'
+                : 'Enable in Settings to auto-detect transactions'
+              }
+            </Text>
           </View>
         </View>
 
