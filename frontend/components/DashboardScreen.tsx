@@ -319,6 +319,81 @@ export default function DashboardScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Quick Add Modal */}
+      <Modal
+        visible={showQuickAddModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleQuickAddCancel}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.quickAddModal, { backgroundColor: theme.colors.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Add {quickAddData.type === 'expense' ? 'Expense' : 'Income'}
+              </Text>
+              <TouchableOpacity 
+                onPress={handleQuickAddCancel}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalContent}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Amount</Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: theme.colors.background, 
+                  borderColor: theme.colors.border,
+                  color: theme.colors.text 
+                }]}
+                placeholder="Enter amount"
+                placeholderTextColor={theme.colors.textSecondary}
+                value={quickAddData.amount}
+                onChangeText={(text) => setQuickAddData({...quickAddData, amount: text})}
+                keyboardType="numeric"
+              />
+
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Description</Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: theme.colors.background, 
+                  borderColor: theme.colors.border,
+                  color: theme.colors.text 
+                }]}
+                placeholder="What was this for?"
+                placeholderTextColor={theme.colors.textSecondary}
+                value={quickAddData.description}
+                onChangeText={(text) => setQuickAddData({...quickAddData, description: text})}
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton, { backgroundColor: theme.colors.textSecondary }]}
+                onPress={handleQuickAddCancel}
+                disabled={isAddingTransaction}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.saveButton, { backgroundColor: theme.colors.primary }]}
+                onPress={handleQuickAddSave}
+                disabled={isAddingTransaction}
+              >
+                {isAddingTransaction ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={styles.modalButtonText}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
