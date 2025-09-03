@@ -38,7 +38,6 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadDashboardData();
-    initializeSmsService();
   }, []);
 
   const initializeSmsService = async () => {
