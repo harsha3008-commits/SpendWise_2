@@ -1112,12 +1112,12 @@ async def get_quick_insights(
 
 # Premium Features & Monthly Reports
 @app.get("/api/analytics/monthly-report")
-@limiter.limit("3/minute")
+@limiter.limit("10/minute")
 async def get_monthly_report(
     request: Request,
     current_user: dict = Depends(get_current_user)
 ):
-    """Generate monthly financial report for premium users"""
+    """Generate AI-powered monthly financial report - FREE for all users"""
     try:
         user_id = current_user["id"]
         
