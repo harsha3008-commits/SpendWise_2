@@ -322,15 +322,48 @@ export default function BillsScreen() {
               <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
 
-            {/* Date Picker */}
+            {/* Date Picker Modal */}
             {showDatePicker && (
-              <DateTimePicker
-                value={newBill.dueDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                minimumDate={new Date()}
-              />
+              <Modal
+                visible={showDatePicker}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowDatePicker(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={[styles.datePickerModal, { backgroundColor: theme.colors.card }]}>
+                    <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Select Due Date</Text>
+                    
+                    <TextInput
+                      style={[styles.dateInput, { 
+                        backgroundColor: theme.colors.background, 
+                        borderColor: theme.colors.border,
+                        color: theme.colors.text 
+                      }]}
+                      value={tempDateString}
+                      onChangeText={handleDateInputChange}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor={theme.colors.textSecondary}
+                    />
+                    
+                    <View style={styles.modalButtons}>
+                      <TouchableOpacity
+                        style={[styles.modalButton, { backgroundColor: theme.colors.textSecondary }]}
+                        onPress={() => setShowDatePicker(false)}
+                      >
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
+                        onPress={handleDateConfirm}
+                      >
+                        <Text style={styles.modalButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
             )}
 
             {/* Recurring */}
