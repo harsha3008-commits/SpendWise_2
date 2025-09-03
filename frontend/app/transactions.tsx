@@ -609,4 +609,71 @@ const createStyles = (theme: any) => StyleSheet.create({
   categoryButtonText: {
     fontSize: 14,
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 100,
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
+    fontWeight: '500',
+  },
+  transactionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  transactionsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: theme.mode === 'dark' ? 'rgba(100, 210, 255, 0.1)' : 'rgba(0, 122, 255, 0.1)',
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  transactionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  autoDetectedBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: theme.colors.warning,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  autoDetectedLabel: {
+    backgroundColor: theme.colors.warning,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  autoDetectedText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: 'white',
+  },
+  transactionHash: {
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: 'monospace',
+  },
 });
