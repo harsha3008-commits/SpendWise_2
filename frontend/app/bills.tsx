@@ -31,6 +31,7 @@ interface Bill {
 export default function BillsScreen() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
