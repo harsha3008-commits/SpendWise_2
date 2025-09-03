@@ -8,7 +8,7 @@ import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { smsService } from '../lib/SmsService';
+
 import { runSMSTests } from '../lib/smsParser';
 
 export default function SettingsScreen() {
