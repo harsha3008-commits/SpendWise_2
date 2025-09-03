@@ -40,36 +40,6 @@ export default function DashboardScreen() {
     loadDashboardData();
   }, []);
 
-  const initializeSmsService = async () => {
-    try {
-      // Skip SMS service initialization in web environment for now
-      if (typeof window !== 'undefined') {
-        console.log('SMS service disabled in web environment');
-        return;
-      }
-      
-      await smsService.initialize();
-      
-      // Listen for new SMS transactions
-      smsService.addTransactionListener((parsedTransaction) => {
-        console.log('New SMS transaction detected:', parsedTransaction);
-        // Refresh dashboard data when new transaction is detected
-        loadDashboardData();
-        
-        // Show notification to user
-        Alert.alert(
-          '💰 Transaction Detected!',
-          `${parsedTransaction.type === 'credit' ? 'Income' : 'Expense'} of ₹${parsedTransaction.amount} detected from SMS`,
-          [
-            { text: 'View', onPress: () => router.push('/transactions') },
-            { text: 'OK' }
-          ]
-        );
-      });
-    } catch (error) {
-      console.error('Failed to initialize SMS service:', error);
-    }
-  };
 
   const loadDashboardData = async () => {
     setIsLoadingStats(true);
