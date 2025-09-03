@@ -94,13 +94,33 @@ export default function BillsScreen() {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(false);
     if (selectedDate) {
       setNewBill({ ...newBill, dueDate: selectedDate });
     }
   };
 
+  const handleDateInputChange = (dateString: string) => {
+    setTempDateString(dateString);
+  };
+
+  const handleDateConfirm = () => {
+    try {
+      const parsedDate = new Date(tempDateString);
+      if (!isNaN(parsedDate.getTime()) && parsedDate >= new Date()) {
+        setNewBill({ ...newBill, dueDate: parsedDate });
+        setShowDatePicker(false);
+        setTempDateString('');
+      } else {
+        Alert.alert('Invalid Date', 'Please enter a valid future date');
+      }
+    } catch (error) {
+      Alert.alert('Invalid Date', 'Please enter a valid date');
+    }
+  };
+
   const showDatePickerModal = () => {
+    setTempDateString(format(newBill.dueDate, 'yyyy-MM-dd'));
     setShowDatePicker(true);
   };
 
