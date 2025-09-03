@@ -71,10 +71,12 @@ export default function DashboardScreen() {
   const handleQuickAction = (actionType: 'expense' | 'income' | 'bills' | 'analytics') => {
     switch (actionType) {
       case 'expense':
-        router.push('/transactions?type=expense');
+        setQuickAddData({ type: 'expense', amount: '', description: '' });
+        setShowQuickAddModal(true);
         break;
       case 'income':
-        router.push('/transactions?type=income');
+        setQuickAddData({ type: 'income', amount: '', description: '' });
+        setShowQuickAddModal(true);
         break;
       case 'bills':
         router.push('/bills');
@@ -85,42 +87,49 @@ export default function DashboardScreen() {
     }
   };
 
-  const quickAddTransaction = async (type: 'expense' | 'income') => {
+  const handleQuickAddSave = async () => {
+    if (!quickAddData.amount || !quickAddData.description) {
+      Alert.alert('Error', 'Please fill in amount and description');
+      return;
+    }
+
     try {
       setIsAddingTransaction(true);
       
-      // Quick add with smart defaults
-      const defaultCategories = {
-        expense: '🍽️ Food & Dining',
-        income: '💼 Salary'
-      };
-      
       const transactionData = {
-        type: type,
-        amount: 100, // Default amount
+        type: quickAddData.type,
+        amount: parseFloat(quickAddData.amount),
         currency: 'INR',
-        categoryId: 'default-category',
-        note: `Quick ${type} added from dashboard`,
-        merchant: type === 'expense' ? 'Quick Add' : undefined,
+        categoryId: quickAddData.type === 'expense' ? 'food' : 'salary',
+        note: quickAddData.description,
         timestamp: Date.now()
       };
 
-      const newTransaction = await transactionAPI.create(transactionData);
+      await transactionAPI.create(transactionData);
       
-      Alert.alert(
-        '✅ Success!',
-        `₹100 ${type} added successfully`,
-        [
-          { text: 'View All', onPress: () => router.push('/transactions') },
-          { text: 'OK', onPress: () => loadDashboardData() }
-        ]
-      );
+      Alert.alert('Success!', `₹${quickAddData.amount} ${quickAddData.type} added successfully`);
+      
+      // Reset form and close modal
+      setQuickAddData({ type: 'expense', amount: '', description: '' });
+      setShowQuickAddModal(false);
+      
+      // Refresh dashboard data
+      loadDashboardData();
       
     } catch (error) {
       console.error('Error adding quick transaction:', error);
       Alert.alert('Error', 'Failed to add transaction. Please try again.');
     } finally {
       setIsAddingTransaction(false);
+    }
+  };
+
+  const handleQuickAddCancel = () => {
+    try {
+      setQuickAddData({ type: 'expense', amount: '', description: '' });
+      setShowQuickAddModal(false);
+    } catch (error) {
+      console.error('Error closing modal:', error);
     }
   };
 
