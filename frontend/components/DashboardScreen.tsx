@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { analyticsAPI, transactionAPI } from '../lib/api';
 import { router } from 'expo-router';
-import { smsService } from '../lib/SmsService';
 
 interface DashboardStats {
   totalIncome: number;
