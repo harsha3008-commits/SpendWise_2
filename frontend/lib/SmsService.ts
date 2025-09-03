@@ -470,15 +470,15 @@ class SmsBackgroundService {
   }
 }
 
-// Export singleton instance
+// Create and export the singleton service instance
 export const smsService = new SmsBackgroundService();
 
-// Auto-initialize on app start
-AppState.addEventListener('change', (nextAppState) => {
-  if (nextAppState === 'active') {
+// Auto-initialize only in native mobile environment
+// Skip auto-initialization in web environment to prevent crashes
+if (typeof window === 'undefined' && Platform.OS !== 'web') {
+  try {
     smsService.initialize().catch(console.error);
+  } catch (error) {
+    console.warn('SMS service auto-initialization failed:', error);
   }
-});
-
-// Initialize immediately
-smsService.initialize().catch(console.error);
+}
