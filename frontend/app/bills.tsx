@@ -13,9 +13,8 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { format, addDays, addMonths } from 'date-fns';
+import { format, addDays, addMonths, parseISO } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface Bill {
   id: string;
