@@ -17,7 +17,6 @@ import { format } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalSearchParams } from 'expo-router';
 import { transactionAPI } from '../lib/api';
-import { smsService } from '../lib/SmsService';
 
 interface Transaction {
   id: string;
