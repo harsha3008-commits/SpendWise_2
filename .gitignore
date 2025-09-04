@@ -273,4 +273,7 @@ SCRATCH.md
 **/*_password*
 **/*_token*
 **/auth_*
-**/api_*
+**/api_*-e 
+# Environment files
+*.env
+*.env.*
